@@ -5,7 +5,7 @@
 ## North star
 Discover overlooked listings across Pokémon eras, grades, languages and slab companies; evaluate the actual card condition and regrading pathways; compare expected resale outcomes with real current sold-price evidence; and show research leads and verified trade opportunities separately.
 
-**Status (2026-10-28):** research and project foundation only. **No new bot implementation, trained predictor, live marketplace integration or automated buying exists in this repository yet.** A separate assistant-produced V1 starter ZIP must **not** be presumed installed or authoritative. The user will supply the final Codex build instruction after reviewing scope.
+**Status (2026-10-28):** foundation and detailed [Codex master build order](docs/CODEX_MASTER_BUILD.md) are committed. **No working Holy Pokémon bot, trained AI model or live marketplace integration exists in this new repository yet**; Codex must implement/test them. A separate assistant-produced V1 starter ZIP is not installed or authoritative. The owner launches the build by instructing Codex to execute the committed build order.
 
 ## Research evidence
 We have 18 canonical source archives inventoried in [research/manifest.csv](research/manifest.csv), including:
@@ -24,4 +24,4 @@ The original files stay **locally stored and immutable**; they are deliberately 
 4. **Market connections:** approved eBay APIs when actually authorized; PSA Vault listings/other legitimate providers where permitted; manual CSV, screenshots and user-provided exports as offline fallback.
 5. **Portfolio protection:** initial shared **$2,000 all-in test cap**, remaining **$5,000 untouched**, no automatic purchases or unapproved paid services.
 
-**Read [AGENTS.md](AGENTS.md) before any Codex work.** Architectural and functional requirements are in [docs/PROJECT_SCOPE.md](docs/PROJECT_SCOPE.md). No final Codex prompt has been written or approved.
+**Codex start:** read [AGENTS.md](AGENTS.md), then execute [docs/CODEX_MASTER_BUILD.md](docs/CODEX_MASTER_BUILD.md). Engineering source references and prior tests are quarantined under [reference/legacy_scanner](reference/legacy_scanner/README.md). Complete data/vision design: [docs/PROJECT_SCOPE.md](docs/PROJECT_SCOPE.md), [docs/AI_GRADER_TRAINING.md](docs/AI_GRADER_TRAINING.md), [docs/MARKET_DATA_SOURCES.md](docs/MARKET_DATA_SOURCES.md). For the actual 250-row structured research transport archive, see [research/DATA_TRANSPORT.md](research/DATA_TRANSPORT.md).

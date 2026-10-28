@@ -2,6 +2,8 @@
 
 **New private home for the Pokémon grading-arbitrage bot.** This project is separate from `jodon373-cmd/pokemon-market-scanner`; the old repository is an optional source of reviewed implementation ideas, **not** the source of truth.
 
+**START CODEX LOCALLY:** [Grader-first implementation and model backtesting instruction](docs/CODEX_GRADER_FIRST_LAUNCH.md). This is the most recent direct launch order, and it includes full Fredy image ingestion/training, out-of-video holdout, integrated financial decisions, eBay and PSA Vault, and a polished blue/red Pokémon-inspired interface. [Master build](docs/CODEX_MASTER_BUILD.md) remains the complete broader specification. **The code is a starting foundation, not a trained grader or completed live scanner.**
+
 ## North star
 Discover overlooked listings across Pokémon eras, grades, languages and slab companies; evaluate the actual card condition and regrading pathways; compare expected resale outcomes with real current sold-price evidence; and show research leads and verified trade opportunities separately.
 

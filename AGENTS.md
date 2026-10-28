@@ -1,5 +1,8 @@
 # Holy Pokémon — repository operating rules
 
+## ACTIVE LOCAL CODEX START: READ FIRST
+The owner is launching the full local build with the linked Fredy Results photos. **Read docs/CODEX_GRADER_FIRST_LAUNCH.md before all other task documents**. It is the most recent and most specific execution order: train and hold-out test a REAL image grader from eligible pre-result condition photos, then integrate all original business/regrading/eBay/PSA Vault features. Follow the rest of this file for evidence integrity, safety and data access. The Mac-only research/local/fredy_results symlink must be verified at runtime; it is not part of GitHub.
+
 ## User-approved scope as of 2026-10-28
 This is the NEW private repository for the eventual Holy Pokémon bot. **ACTIVE BUILD AUTHORIZATION (2026-10-28): owner explicitly requested immediate implementation of the entire source-grounded Fredy business operating system, true grader training, marketplace/PSA Vault paths and a runnable all-in-one Holy Pokémon app.** Execute docs/CODEX_MASTER_BUILD.md and docs/FREDY_BUSINESS_REVERSE_ENGINEERING.md end to end; do not stop after drafting more docs. Existing active Python modules are initial committed implementation; extend rather than replace. This repo also includes reference-only legacy code; never import it into production without review and tests.
 

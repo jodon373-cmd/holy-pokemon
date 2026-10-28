@@ -1,3 +1,5 @@
+> **SUPERSEDED AS LAUNCH ENTRYPOINT.** For any new Codex execution, start from [CODEX_ONE_SHOT_EXECUTION.md](CODEX_ONE_SHOT_EXECUTION.md). This file remains a supporting requirements reference and must not be launched as a separate coding task.
+
 # CODEX MASTER BUILD ORDER — HOLY POKÉMON
 Version 1.0 · 2026-10-28 · Operator-approved design. Read this document in full before editing code.
 

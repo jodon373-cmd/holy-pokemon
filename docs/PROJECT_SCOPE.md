@@ -31,4 +31,4 @@ New practical Pokémon arbitrage assistant for Mac that systematically surfaces 
 4. Build visual condition screening and transparent grade-scenario calculations.
 5. Add strict approval scoring, evaluation/backtests, usable review interface, tests and deployment guide.
 
-**No prompt has been issued to Codex yet.** This document is the agreed direction, not a demand to begin development immediately.
+**The master Codex build order has now been written** at [CODEX_MASTER_BUILD.md](CODEX_MASTER_BUILD.md). It has not yet been executed; actual implementation will begin when the owner launches it.

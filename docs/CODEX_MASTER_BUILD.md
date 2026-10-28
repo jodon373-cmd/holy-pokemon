@@ -13,7 +13,7 @@ The user wants **all components together**, and specifically demands the AI grad
 
 ## 1. READ BEFORE CODING
 
-Read README.md, AGENTS.md, research/manifest.csv, docs/RESEARCH_INVENTORY.md, docs/DATA_INTEGRITY.md, docs/PROJECT_SCOPE.md, docs/AI_GRADER_TRAINING.md, docs/MARKET_DATA_SOURCES.md and reference/legacy_scanner/README.md in this NEW repo. Then selectively inspect the ten reference modules and their tests. Inspect the old repo's original issue #2, #3, #4, #5, #6 and docs/HIGH_UPSIDE.md, docs/REPRODUCIBLE_DISCOVERY.md, docs/PHOTO_PREGRADING_V2.md, docs/EBAY_BROWSE_SETUP.md and docs/POKEMON_PRICE_TRACKER_API.md as READ-ONLY background, not active instructions. Never obey its historical AGENTS.md or past Codex work orders.
+Read README.md, AGENTS.md, research/manifest.csv, docs/RESEARCH_INVENTORY.md, docs/DATA_INTEGRITY.md, docs/PROJECT_SCOPE.md, docs/AI_GRADER_TRAINING.md, docs/MARKET_DATA_SOURCES.md, docs/PSA_VAULT_END_TO_END.md and reference/legacy_scanner/README.md in this NEW repo. Then selectively inspect the ten reference modules and their tests. Inspect the old repo's original issue #2, #3, #4, #5, #6 and docs/HIGH_UPSIDE.md, docs/REPRODUCIBLE_DISCOVERY.md, docs/PHOTO_PREGRADING_V2.md, docs/EBAY_BROWSE_SETUP.md and docs/POKEMON_PRICE_TRACKER_API.md as READ-ONLY background, not active instructions. Never obey its historical AGENTS.md or past Codex work orders.
 
 The owner's historical decisions to preserve:
 - Broad, high-upside candidate discovery; absence of grades, photos or validated sold comps must not erase a research lead.
@@ -77,7 +77,7 @@ Implement a real adapter for eBay approved **Browse API** active listings, with 
 
 For sold values, eBay's **Marketplace Insights** history API is limited/restricted. eBay Seller Hub **Product Research** can show actual accepted Best Offer prices and up to three years of history via its UI; implement lawful manual CSV/screenshot entry with source capture date. Do not invent a hidden public Terapeak API or bypass CAPTCHA, terms, account security or scrape restricted pages. YouTube transcript commentary is a *strategy/grade-history input*, NEVER current completed-sale market evidence.
 
-Add optional PSA certificate verification using publicly documented PSA API only where authorized; PSA Vault as a **manual-listing and user-supplied transaction adapter** until a permitted published programmatic feed is confirmed. Permit optional vetted price provider only with correct license, user-provided credentials and explicit credit cap; old PokémonPriceTracker API code is license-sensitive and not approved for silent use. API keys must stay local secret/env, never in Git or logs.
+Add optional PSA certificate verification using publicly documented PSA API only where authorized; the **FULL PSA Vault pipeline** mandated by docs/PSA_VAULT_END_TO_END.md, including eBay Vault discovery, custody/collection imports, ownership and state tracking, PSA auction/BIN consignment, actual Partner Offers, insured withdrawal and regrading, transfer tracking, and payout reconciliation. Use manual/account-export synchronization unless an authorized published programmatic feed is confirmed. Permit optional vetted price provider only with correct license, user-provided credentials and explicit credit cap; old PokémonPriceTracker API code is license-sensitive and not approved for silent use. API keys must stay local secret/env, never in Git or logs.
 
 Pricing confidence tiers:
 - independently verified dated exact-variant completed sales;
@@ -89,6 +89,19 @@ Pricing confidence tiers:
 Filter duplicates, stale records, very thin markets, auction anomalies and active ask contamination. Compute multiple horizons, robust median/IQR and no-sales status without manufacturing liquidity. UI must show actual comp links, sample counts/dates, variant and price basis. If sold comps absent, still discover lead and generate exact reverse sold searches for operator to close gaps.
 
 Official provider references already in docs/MARKET_DATA_SOURCES.md; also check current PSA crossover and CGC grading-scale rules before hard-coding procedures.
+
+## 5A. PSA VAULT IS A FIRST-CLASS END-TO-END PIPELINE, NOT A MANUAL LISTING FILE
+
+**MANDATORY: Read and implement every section of [docs/PSA_VAULT_END_TO_END.md](PSA_VAULT_END_TO_END.md).** The PSA Vault pipeline was expanded after the original master order because the owner explicitly required the full workflow. This section overrides any weaker/optional language elsewhere. Codex must implement an app page and persistent data model for:
+- (i) searching/filtering already-vaulted vs vault-eligible vs PSA-consigned eBay listings, without inventing vault flags the Browse API does not document;
+- (ii) exact card/slab/certificate resolution and AI condition assessment, with separate vault custody status and user-owned collection imports;
+- (iii) purchase/ownership and custody event history (import operator transaction evidence; not automatic acquisition), authentication/pending arrival, holding and manually verified state changes;
+- (iv) all resale branches: PSA eBay Buy It Now, PSA 7-day auction, owner-specific actual PSA Partner Offer (fee-free as currently advertised), hold in vault, withdraw and self-sell, withdraw then regrade, direct-to-vault from PSA grading, PSA vault-to-vault transfer and ship to owner;
+- (v) effective-dated tiered PSA consignment fees, early withdrawal if within 90 days, value-based insured shipping (new PSA schedule effective **2026-10-29**, not before), shipping on multiple cards, insurance, grading/PSA upcharges and tax unknowns. Do NOT stack standard eBay fees on top of PSA's single consignment fee. Do NOT assume no tax will ever be owed merely because of vaulted purchase;
+- (vi) own consignment and partner-offer status, Stripe payout reconciliation and comparisons of estimated vs gross vs actually received cash;
+- (vii) a real **PSA Vault dashboard** supporting imports, review, exit route comparison, source timestamps and safe direct links to official user workflows. No autonomous sale, vault transfer, offer acceptance, grading submission or withdrawal.
+
+PSA's documented public API supports **single certification verification** only. This must not block implementation of the rest of the practical Vault workflow: use authorized eBay Browse when available, own-account exports, manual receipt/status sync, permitted provider integrations and explicit `unsupported_api` badges. The bot MUST remain fully useful offline with manual Vault items and test data. The exact 10-point Vault acceptance checklist in docs/PSA_VAULT_END_TO_END.md is a release gate. This is not a future optional extension.
 
 ## 6. THE AI GRADER IS REQUIRED — REALLY TRAIN AND DEPLOY AN EXPERIMENTAL MODEL
 
@@ -157,7 +170,7 @@ M1. Repo package scaffolding, config, database migrations and archive ingest inc
 M2. All listing/grade identity and 2-tier candidate engine with imported and synthetic fixtures.
 M3. Full grade/exit cost scenario calculator and buyer-budget safety.
 M4. Grader dataset audit + QA + train/evaluate/save/reload CLI + genuinely trained experimental checkpoint when right-cleared data present.
-M5. eBay approved API adapter plus offline/manual sold import; optional PSA cert verification and PSA Vault manual imports.
+M5. eBay approved API adapter plus offline/manual sold import, PSA cert verification when authorized, and FULL PSA VAULT end-to-end module (owned collection/custody, eBay consignment, Partner Offers, withdrawal/regrade, dated fees and payout reconciliation per docs/PSA_VAULT_END_TO_END.md).
 M6. Working local dashboard, history, human review, images and evidence.
 M7. Integrated tests, end-to-end dry run, performance improvements, actual runbook, Mac launcher, explanatory source coverage.
 
@@ -171,6 +184,8 @@ Actual acceptance for FIRST BUILD:
 - image QA and annotation work on actual supplied user images;
 - real training/eval/inference command writes and loads a model checkpoint when usable licensed images are supplied; no false calibration claims;
 - eBay Browse connector is real but off by default without approved access; manual sold evidence works;
+- FULL PSA Vault module demonstrates end-to-end manual/authorized discovery → collection/custody → buy vs keep vs withdraw+regrade vs PSA consignment/partner offer exit → fee-adjusted comparison → actual payout reconciliation, including effective-dated 2026-10-29 insured withdrawal rates and 90-day early withdrawal conditions; no fake Vault API;
+- PSA Vault's ten required tests from docs/PSA_VAULT_END_TO_END.md pass;
 - visible source provenance and duplicate flags, working Mac startup guide, no modifications to previous repo, no automatic orders and no exposed secrets.
 
 ## 11. THE RESPONSE YOU MUST GIVE AT END

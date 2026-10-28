@@ -26,6 +26,9 @@ The certificate API can help verify a listing's claimed grade and card identific
 ## Evidence alternatives, not fake APIs
 Fredy's YouTube transcripts and monthly recaps are exceptional for **grading route outcomes, condition failure patterns, creator transaction claims and candidate discovery ideas**. They are not a substitute for today's eBay sold-prices or live inventory. The bot should build *reverse search queries* from source card/era/variant + grading pathways, and accept operator-supplied completed-sale evidence to close valuation gaps. Preserve distinction between creator estimated value, gross eBay sale claim and verified net payout.
 
+## PSA Vault: UPDATED end-to-end mandate
+The original minimal `psa_vault_manual_import` description above was only the fallback source adapter, **not** the full product requirement. The mandatory [PSA Vault end-to-end specification](PSA_VAULT_END_TO_END.md) includes eBay vaulted/eligible/consigned discovery, user-owned collection and custody, routes to PSA consignment auctions/Buy It Now, verified user-provided Partner Offers, withdraw and regrade decisions, effective-dated PSA fee schedule, manual official-account transfer status and Stripe payout reconciliation. Use only documented/authorized interfaces; this is an integrated complete workflow even when no general PSA Vault API exists.
+
 ## Version 1 provider deliverables
 - Offline launch works with historical research ZIP + manually provided active listings and sold-comps CSV, produces clearly labeled unverified leads.
 - eBay live adapter behind explicit `PRODUCTION_APPROVED` gate and mocked tests, with valid OAuth and safe budgets. Attempt live only when operator credentials/approval exist; do not buy or use paid endpoints automatically.

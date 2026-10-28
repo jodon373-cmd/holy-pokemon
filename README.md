@@ -5,7 +5,7 @@
 ## North star
 Discover overlooked listings across Pokémon eras, grades, languages and slab companies; evaluate the actual card condition and regrading pathways; compare expected resale outcomes with real current sold-price evidence; and show research leads and verified trade opportunities separately.
 
-**Status (2026-10-28):** foundation and detailed [Codex master build order](docs/CODEX_MASTER_BUILD.md) are committed. **No working Holy Pokémon bot, trained AI model or live marketplace integration exists in this new repository yet**; Codex must implement/test them. A separate assistant-produced V1 starter ZIP is not installed or authoritative. The owner launches the build by instructing Codex to execute the committed build order.
+**Status (2026-10-28):** implementation has started. Executable read-only Python modules include the 8-month business audit, local transport audit, multi-route pricing, PSA Vault fee/custody/payout logic, specimen/event cash ledger and experimental PyTorch train/infer code. GitHub CI unit tests validate the currently implemented modules. **The complete all-in-one UI, live authorized marketplace adapters and genuinely trained real-data grading weights are still not finished.** Codex must finish the [master build order](docs/CODEX_MASTER_BUILD.md) and [Fredy business reconstruction](docs/FREDY_BUSINESS_REVERSE_ENGINEERING.md). A separate assistant-produced V1 starter ZIP is not installed or authoritative. The owner launches the build by instructing Codex to execute the committed build order.
 
 ## Research evidence
 We have 18 canonical source archives inventoried in [research/manifest.csv](research/manifest.csv), including:

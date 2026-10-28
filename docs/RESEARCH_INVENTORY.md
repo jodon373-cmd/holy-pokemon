@@ -5,9 +5,9 @@
 
 The 18 canonical archives include:
 - **8 monthly financial packs:** February, March, April, May V2 recapture, June, July, August, September. The February archive records 9 case rows; later months have variable schemas, types of sales and incomplete costs.
-- **8 Pokémon individual/submission case packs:** PSA9→PSA clean $12,174 (22 rows: 20 primary + 2 bonus), PSA9→PSA second experiment (20 primary), CGC consistency 13, CGC harsher 20, Community Challenge 20 (lightweight), PSA→CGC $7,246 (20), PSA→CGC $7,999 (20), plus grading-route/bonus records inside packs. **Do not sum overlapping individual cases as a unique sample.**
+- **7 Pokémon individual/submission case packs:** PSA9→PSA clean $12,174 (22 rows: 20 primary + 2 bonus), PSA9→PSA second experiment (20 primary), CGC consistency 13, CGC harsher 20, Community Challenge 20 (lightweight), PSA→CGC $7,246 (20), PSA→CGC $7,999 (20), plus grading-route/bonus records inside packs. **Do not sum overlapping individual cases as a unique sample.**
 - **2 aggregate studies:** 546 original PSA→CGC submissions and a PSA-vs-CGC two-year gem-rate study. The 546 cohort is **not** an additional 546 newly itemized physical card rows; keep distributions and curated examples separate.
-- **1 extra cross-game One Piece pack:** BGS9.5→PSA, 20 physical cards, 17 PSA10s, isolated in its own domain.
+- **1 cross-game One Piece pack:** BGS9.5→PSA, 20 physical cards, 17 PSA10s, isolated in its own domain.
 
 > Counts above are grouped semantically; the canonical manifest is authoritative for exactly which 18 ZIP files belong to the intake. Detailed cases may overlap monthly reports or the 546 cohort.
 

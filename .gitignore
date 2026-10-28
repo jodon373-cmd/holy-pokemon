@@ -28,3 +28,13 @@ __pycache__/
 .DS_Store
 .venv/
 venv/
+
+# Source images, local checkpoints and derived training caches never belong in Git
+local_models/
+models/local/
+research/derived/
+outputs/grader/
+*.pt
+*.pth
+*.safetensors
+*.onnx

@@ -1,0 +1,21 @@
+name: Holy Pokémon foundation tests
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  offline-unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Read-only unit tests
+        run: python -m unittest discover -s tests -p 'test_business_engine.py' -v
+      - name: Reconstruct source-reported totals
+        run: python -m holy_pokemon monthly > /tmp/fredy_monthly_report.json
+      - name: Export evidenced operating rules
+        run: python -m holy_pokemon rules > /tmp/fredy_rules.json

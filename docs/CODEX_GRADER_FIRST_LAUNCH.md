@@ -1,3 +1,5 @@
+> **SUPERSEDED AS LAUNCH ENTRYPOINT.** For any new Codex execution, start from [CODEX_ONE_SHOT_EXECUTION.md](CODEX_ONE_SHOT_EXECUTION.md). This file remains a supporting requirements reference and must not be launched as a separate coding task.
+
 # CODEX GRADER-FIRST LAUNCH — ALL-IN-ONE HOLY POKÉMON
 Version 2026-10-28. This document is the operator-approved concrete execution order for the cloned local Mac repository. It **supplements** (does not replace) docs/CODEX_MASTER_BUILD.md, docs/AI_GRADER_TRAINING.md, docs/FREDY_BUSINESS_REVERSE_ENGINEERING.md, docs/PSA_VAULT_END_TO_END.md and research/FULL_SOURCE_TRANSPORT.md.
 

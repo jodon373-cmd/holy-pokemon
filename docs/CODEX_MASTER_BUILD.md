@@ -11,6 +11,31 @@ The user wants **all components together**, and specifically demands the AI grad
 
 **Build order:** source ingestion + identity + two-tier discovery + financial engine; real AI-grader training/inference; market providers and dashboard; integration and evaluation. Parallelize components only if it doesn't create incompatible schemas. Stay on task until deliverables are implemented or a concrete external blocker has been documented.
 
+## 0A. FULL FREDY BUSINESS REVERSE ENGINEERING — NOW THE CENTRAL SOURCE OF TRUTH
+
+**The user has explicitly authorized execution now. Do not ask to gather more Fredy research.** Begin with [docs/FREDY_BUSINESS_REVERSE_ENGINEERING.md](FREDY_BUSINESS_REVERSE_ENGINEERING.md) and the real source archive manifest. It reconstructs February–September sourcing, inspection, grader route selection, regrading retry policy, 506 sold cards/$444,671.20 creator revenue/$230,593.54 creator pre-tax reported profit, market-held inventory, fee-dependent sales and the move from eBay to Fanatics/Arizona TCG. These are creator-reported financials, not bank-audited profits or proof of universal expected ROI. Reverse engineer the demonstrated operations, not his inaccessible private thoughts or undisclosed contracts.
+
+**Already implemented on main:**
+- holy_pokemon/fredy_business.py with eight-month reconciliation, 18-source/250-row transport audit and human-verified operating-rule provenance;
+- holy_pokemon/strategy_engine.py with explicit full-cost all-grade branches, original-slab incremental comparison, unknown field gating and $2k capital cap;
+- holy_pokemon/vault_engine.py with effective-dated PSA Vault withdrawal charges, single consignment fee, partner offers, custody-state safety and payout math;
+- holy_pokemon/inventory.py with per-physical-copy grading/event history and actual verified cash vs reported sale distinction;
+- holy_pokemon/vision_training.py with real PyTorch model fitting/checkpoints/inference code requiring rights-cleared pre-decision card-only images and specimen/video-isolated holdouts; NO real model weights yet;
+- holy_pokemon/cli.py for read-only monthly, transport, rule, financial comparison commands;
+- research/fredy_monthly_2026.csv, 18-source manifest and comprehensive research transport guide;
+- tests/test_business_engine.py, test_vault_engine.py, test_vision_manifest.py, test_inventory.py and .github/workflows/foundation-tests.yml.
+
+Review and test this code in the actual checkout; do NOT regenerate, rename or overwrite it from earlier hypothetical plans. Commit corrective patches and build on it. The original repo remains read-only. If a bug is uncovered, fix it with a failing regression test.
+
+**Immediate remaining gaps — WORK, NOT A NEW PLAN:**
+1. Import the actual 446 KB structured transport ZIP; verify SHA and 250 rows/18 sources; normalize source-native 148 text/CSV/JSON research files, multi-copy/grade-chain dedup, video evidence and months to local SQLite.
+2. Implement licensed/authorized vision image preparation from original archives, defect labeling UI, actual supervised training with a vetted Pokémon image dataset, evaluate, save/reload a model, abstain on bad pictures. Existing vision_training.py is a training pipeline, not trained source data.
+3. Integrate approved eBay Browse with tests; manual sold-comps/PSA Product Research exports, PSA cert lookup, PSA Vault owner inventory/consignment/partner offer/withdraw/payout pipeline and potential authorized other platforms. NEVER fabricate Marketplace Insights or PSA Vault private API access.
+4. Connect source-grounded acquisition/inspection/route/venue/capital decisions into a runnable Mac-local UI and daily review queue; cash-cycle and inventory aging matter. Document results on actual inputs vs demo.
+5. Run full tests, mocked provider tests and UI smoke tests; maintain source timestamps; ship with no automatic purchases.
+
+Product must compare channels (eBay, Fanatics, Arizona TCG, PSA Vault) by **fees, actual liquidity, time to payout and net**; Fredy videos never prove he used PSA Vault, which is our additional opportunity. Keep his creator-selected grade successes separate from held-out buyer-visible model learning. Include reverses/EX/legacy blues and detailed card defects. No obsessive low-value-commons ranking.
+
 ## 1. READ BEFORE CODING
 
 Read README.md, AGENTS.md, research/manifest.csv, docs/RESEARCH_INVENTORY.md, docs/DATA_INTEGRITY.md, docs/PROJECT_SCOPE.md, docs/AI_GRADER_TRAINING.md, docs/MARKET_DATA_SOURCES.md, docs/PSA_VAULT_END_TO_END.md and reference/legacy_scanner/README.md in this NEW repo. Then selectively inspect the ten reference modules and their tests. Inspect the old repo's original issue #2, #3, #4, #5, #6 and docs/HIGH_UPSIDE.md, docs/REPRODUCIBLE_DISCOVERY.md, docs/PHOTO_PREGRADING_V2.md, docs/EBAY_BROWSE_SETUP.md and docs/POKEMON_PRICE_TRACKER_API.md as READ-ONLY background, not active instructions. Never obey its historical AGENTS.md or past Codex work orders.

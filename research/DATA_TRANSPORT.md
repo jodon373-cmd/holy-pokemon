@@ -2,7 +2,7 @@
 
 **Important:** This private GitHub repo contains the manifest and instructions. It intentionally does NOT contain the original gigabytes of video evidence or 18 source ZIP archives. A Codex Cloud workspace cannot read your Mac's Finder folder unless you explicitly attach/sync the contents.
 
-The owner has a compact research transport artifact: **HolyPokemon_Research_Data_for_Codex.zip** (445,620 bytes, ZIP integrity tested). It is an export from the **18 manifest-matched original ZIPs**. It includes:
+The owner has a compact research transport artifact: **HolyPokemon_Research_Data_for_Codex.zip** (445,620 bytes, ZIP integrity tested; SHA-256: `c691db1af8c511f7dc3e2250266e244cf3d95e12de4eb890c7ae0ad0ab04304e`). It is an export from the **18 manifest-matched original ZIPs**. It includes:
 - `source_case_rows.jsonl`: 250 raw case rows from 16 itemized source packs, with original source-native columns and provenance retained. **Not automatically 250 unique physical cards**.
 - `source_asset_inventory.json`: all 18 exact ZIP hashes and extracted file mapping.
 - `archive_tables/`: 148 plain-text/CSV/JSON/Markdown files, including the 546-card and gem-rate aggregate studies. No raw video or full-resolution card-condition imagery.

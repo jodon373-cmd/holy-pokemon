@@ -16,6 +16,9 @@ New practical Pokémon arbitrage assistant for Mac that systematically surfaces 
 
 **F. Rank:** Separate wide high-upside/watchlist **research discovery** from conservative strict **trade-ready approval**. User manually approves any trade. Track changing sales/comps and source freshness. Show summary, source links, expected upside range, likely reasons, risks and what needs verification.
 
+## PSA Vault — first-class end-to-end workflow
+Read [PSA_VAULT_END_TO_END.md](PSA_VAULT_END_TO_END.md). Product must support permitted discovery of vaulted and vault-eligible eBay listings, collection/custody import, actual PSA Partner Offers, PSA auctions/Buy It Now consignment, withdraw vs sell vs regrade net P&L, dated insurance/withdrawal fees, optional vault-to-vault transfer tracking (manual irreversible action only) and owner payout reconciliation. PSA's single-cert public API does NOT provide a public personal Vault inventory endpoint. Implement a complete user-operable flow with manual/authenticated permitted inputs and clearly label absent automated sync. These are required for the initial integrated product, not later enhancements.
+
 ## Engineering north star
 - Python core with SQLite or comparable auditable store; modular adapters for marketplace and image inspection; CLI first, then streamlined desktop/web UX.
 - Deterministic identity and math, incremental resumable ingestion, local-first caching, structured provenance and reproducible tests. No unnecessary AI call per listing and no forced premium subscriptions.

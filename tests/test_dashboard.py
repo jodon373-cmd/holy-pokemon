@@ -20,7 +20,7 @@ class LocalDashboardTests(unittest.TestCase):
         with urlopen(self.base+"/") as r:
             s=r.read().decode()
             self.assertIn("Holy Pokémon",s)
-            self.assertIn("NOT",s.upper() if "NOT" in s.upper() else "NOT")
+            self.assertIn("No live eBay",s)
 
     def test_monthly_source_data_real(self):
         with urlopen(self.base+"/api/monthly") as r:

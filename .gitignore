@@ -38,3 +38,8 @@ outputs/grader/
 *.pth
 *.safetensors
 *.onnx
+
+## CompSniper read-only provider cache, API reports, and local working state
+work/compsniper_cache/
+work/compsniper_*.json
+work/compsniper_*.csv

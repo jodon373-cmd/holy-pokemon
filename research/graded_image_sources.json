@@ -1,0 +1,51 @@
+{
+  "registry_version": "holy_pokemon_image_sources_v1",
+  "project_focus": {
+    "game": "pokemon",
+    "primary_route": "PSA 8 -> CGC Gem Mint 10",
+    "primary_observed_psa_grades": [8, 9, 10],
+    "priority_era_years": [1996, 2007],
+    "priority_sets": [
+      "Base Set", "Jungle", "Fossil", "Team Rocket", "Gym Heroes",
+      "Gym Challenge", "Neo", "Expedition", "Aquapolis", "Skyridge",
+      "EX-series", "Japanese vintage promos"
+    ],
+    "grade_labels": "observed, externally verified grader outcomes only",
+    "require_both_sides": true,
+    "require_no_grade_label_leakage": true,
+    "split_unit": "physical specimen with source-group containment",
+    "negative_examples": "retain 6-7 and hidden-defect cases for model error diagnostics"
+  },
+  "sources": [
+    {
+      "id": "jyesr_pokemon_tcg_grading",
+      "url": "https://huggingface.co/datasets/jyesr/pokemon-tcg-grading",
+      "snapshot": "02e6b335b59b67e2d2df678ce8fcff4b1a0b1d8a",
+      "size_estimate_gb": 17,
+      "claimed_images": "more than 20000 images; do not infer paired specimen count",
+      "metadata_file": "metadata.csv",
+      "label_semantics": "expected PSA grade, NOT observed PSA outcome",
+      "license_or_training_permission": "not verified",
+      "status": "QUARANTINED_METADATA_ONLY",
+      "possible_approved_role": "visual pretraining or unsupervised quality analysis after license review",
+      "not_approved_for": "supervised ground-truth PSA grade training"
+    },
+    {
+      "id": "pacoalberola_poke_grader_images",
+      "url": "https://huggingface.co/datasets/pacoalberola/Poke-Grader-Dataset-Images-PSA",
+      "snapshot": "b0d5cf34b47494de944c686f86fc37a0e4f984a6",
+      "size_estimate_mb": 282,
+      "claimed_images": 3156,
+      "metadata_file": "grades.csv",
+      "metadata_fields": ["filename", "overall_grade", "surface", "corners", "edges", "centering", "source"],
+      "label_semantics": "publisher grade claim; mixes PSA, CGC, BGS and ACE; decimal feature values are not independently verified subgrades",
+      "license_or_training_permission": "not verified; no dataset card displayed",
+      "status": "QUARANTINED_METADATA_ONLY",
+      "possible_approved_role": "post-grade diagnostic examples after source, copyright, specimen and label audits",
+      "not_approved_for": "assumed paired and pre-purchase PSA ground truth"
+    }
+  ],
+  "dataset_storage_policy": "Keep large original files in ignored local cache, never check images or secrets into GitHub. Preserve hashes and source licenses.",
+  "owner_action": "Obtain source permission or documented usable license; establish genuine grade outcomes and same-copy front/back photos. Do not claim 23156 training specimens.",
+  "model_promotion": "Require specimen-disjoint blind holdout and era-specific grade metrics; never count after-training fitting as a successful backtest."
+}

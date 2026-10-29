@@ -8,6 +8,10 @@ The owner explicitly requires **unrestricted discovery across all Pokémon card 
 
 **Execution scope/credits/limits are to be specified by the owner separately for the particular Codex run.** Do not treat example four-query batching or ten top-card queues as universe caps. Do not run paid/unapproved APIs, violate provider quotas or execute any purchase. Preserve the newer local Mac app; don't replace it with the older GitHub foundation. This extension augments rather than supersedes the rest of this execution contract.
 
+### 2026-10-29 — CompSniper exact-grade comps + PSA image sourcing extension (not a new competing contract)
+
+The owner authorized implementing [CompSniper comps and PSA image integration](COMPSNIPER_COMPS_AND_PSA_IMAGE_INTEGRATION.md). Use `holy_pokemon/compsniper.py`, `tests/test_compsniper.py`, and `research/strategy_discovery/psa_entei_34_comp_provider_benchmark_2026-10-29.json` as starting code and acceptance fixtures. CompSniper docs: PSA catalog search/card-by-spec/sales/populations; up to 3 years eBay Product Research; recent sold with accepted offer status; no documented PSA SecureScan-quality front/back image endpoint. PSA SecureScan is a separate condition/photo input, not a comp-price API. Owner's PSA official Public API request received 403 approved-customer restriction (Oct 28, 2026); request for approval and licensed PSA auction price feed pending. Do not claim access or repeatedly retry denied PSA API. Configure owner key via local environment/secret store only; avoid unapproved paid usage, autoscraping, auto-buying, and false transaction verification. Merge into existing newer Mac app and build working integration with tests, not another plan. Owner controls execution scope and budget.
+
 ## A. SINGLE SOURCE OF DIRECTION — EFFICIENT CODEX USAGE
 
 This file supersedes older launch prompts as the EXECUTION ENTRYPOINT. Existing detail specifications remain informative, not competing orders:

@@ -4,6 +4,12 @@
 
 **START CODEX LOCALLY:** **[ONE-SHOT ALL-IN-ONE EXECUTION](docs/CODEX_ONE_SHOT_EXECUTION.md)** is now the single most recent and authoritative build order. It covers full Fredy images + held-out training, all sourced arbitrage rules, eBay/PSA Vault/other venue adapters, portfolio cash cycle, backtesting, and premium blue/red Pokémon-inspired dashboard. Older [master build](docs/CODEX_MASTER_BUILD.md) and [grader-first](docs/CODEX_GRADER_FIRST_LAUNCH.md) documents are supporting technical references, not competing prompts. **The code is a starting foundation, not a trained grader or completed live scanner.**
 
+## Open-ended arbitrage strategy research — 2026-10-29
+
+**[READ THE COMPLETE NEW STRATEGY PLAYBOOK](docs/OPEN_ENDED_ARBITRAGE_DISCOVERY.md)** · **[ALL SOURCE/UNCERTAINTY RECORDS](research/strategy_discovery/evidence_manifest.json)** · **[13 EXTENSIBLE ROUTES](research/strategy_discovery/routes.json)**.
+
+Includes Jungle (all 64 base cards and 152 search variants), Pokémon Promos, cross-set Fossil/Base Set 2/Team Rocket/Gym Heroes/Neo/2010s comparisons, source-reported completed sales, FredyCards' 546-card PSA→CGC cohort, two-year grading-era trends and counterexamples. **The current shortlists are discovery seeds, not restrictions.** Codex can investigate wholly new sets/cards/strategies or import an arbitrary card universe with `python3 -m holy_pokemon.open_strategy_discovery --universe path/to/new_cards.csv`. This merely generates research queries; no live APIs are called, no current prices or grade-conversion odds are invented. **Owner sets Codex execution/credit/query limits in the next assignment**, not this repository. Preserve conservative research vs manual trade-approval separation. GitHub additions are not guaranteed to be integrated into the newer running Mac app.
+
 ## North star
 Discover overlooked listings across Pokémon eras, grades, languages and slab companies; evaluate the actual card condition and regrading pathways; compare expected resale outcomes with real current sold-price evidence; and show research leads and verified trade opportunities separately.
 

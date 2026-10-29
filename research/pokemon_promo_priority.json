@@ -1,0 +1,75 @@
+{
+  "schema": "holy_pokemon_priority_research_v1",
+  "id": "pokemon-promo",
+  "label": "Pokémon Promo / Black Star — High Priority Arbitrage",
+  "priority_tier": "CRITICAL_RESEARCH",
+  "priority_weight": 100,
+  "canonical_category_url": "https://www.pricecharting.com/console/pokemon-promo",
+  "guide_kind": "pricecharting_category_reference_not_verified_completed_sales",
+  "scope": "All matching Pokemon Promo / Black Star editions; card number, stamp, foil, language, year and promo line must be independently confirmed.",
+  "workflow": "Authorized eBay active-listing discovery; separate verified dated sold comps required before trade approval.",
+  "source_retrieved_date": "2026-10-29",
+  "default_query_limit": 4,
+  "queries": [
+    {
+      "id": "black-star-psa9",
+      "q": "pokemon black star promo psa 9",
+      "route": "PSA_9_TO_PSA_10"
+    },
+    {
+      "id": "black-star-psa8",
+      "q": "pokemon black star promo psa 8",
+      "route": "PSA_8_TO_CGC_GEM_10"
+    },
+    {
+      "id": "black-star-cgc95",
+      "q": "pokemon black star promo cgc 9.5",
+      "route": "CGC_9_5_TO_PSA_10"
+    },
+    {
+      "id": "black-star-bgs95",
+      "q": "pokemon black star promo bgs 9.5",
+      "route": "BGS_9_5_TO_PSA_10"
+    },
+    {
+      "id": "promo-eevee11",
+      "q": "pokemon promo eevee 11 psa 9",
+      "route": "PSA_9_TO_PSA_10"
+    },
+    {
+      "id": "promo-pikachu12-holo",
+      "q": "pokemon promo pikachu holo 12 psa 9",
+      "route": "PSA_9_TO_PSA_10"
+    },
+    {
+      "id": "promo-mewtwo12",
+      "q": "pokemon promo mewtwo 12 psa 9",
+      "route": "PSA_9_TO_PSA_10"
+    },
+    {
+      "id": "promo-mew8",
+      "q": "pokemon black star promo mew 8 psa 9",
+      "route": "PSA_9_TO_PSA_10"
+    },
+    {
+      "id": "promo-electabuzz2",
+      "q": "pokemon black star promo electabuzz 2 psa 9",
+      "route": "PSA_9_TO_PSA_10"
+    },
+    {
+      "id": "promo-psyduck7-cosmos",
+      "q": "pokemon promo psyduck cosmos holo 7 psa 9",
+      "route": "PSA_9_TO_PSA_10"
+    },
+    {
+      "id": "promo-groudon2-holo",
+      "q": "pokemon promo groudon ex holo 2 psa 9",
+      "route": "PSA_9_TO_PSA_10"
+    },
+    {
+      "id": "promo-riolu10-pc",
+      "q": "pokemon promo riolu pokemon center 10 psa 9",
+      "route": "PSA_9_TO_PSA_10"
+    }
+  ]
+}

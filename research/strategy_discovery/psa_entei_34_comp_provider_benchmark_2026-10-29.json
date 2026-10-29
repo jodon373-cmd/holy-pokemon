@@ -1,0 +1,129 @@
+{
+  "id": "psa_entei_34_reverse_foil_comp_provider_benchmark",
+  "as_of": "2026-10-29",
+  "status": "OWNER_SUPPLIED_UI_REPORT_NOT_INDEPENDENT_PROVIDER_API_VALIDATION",
+  "canonical_identity": {
+    "year": 2001,
+    "subject": "Entei",
+    "card_number": "34",
+    "variant": "Movie Promo reverse foil",
+    "manufacturer": "Pokemon",
+    "grade_company": "PSA",
+    "psa_catalog_aliases": [
+      "2001 Pokemon Game Movie Entei-Reverse Foil #034 Pokemon 3 Movie Promo",
+      "2001 Pokemon Wizards of the Coast Black Star Promos Entei #34"
+    ],
+    "source_psa_spec_id": null,
+    "caution": "Select exact PSA specId from /v1/psa/search; do not rely on a guessed ID."
+  },
+  "live_specimen_inspection": {
+    "graded": "PSA 9",
+    "cert": "108755543",
+    "cert_source": "owner-supplied slab photos",
+    "high_resolution_psa_cert_page": "https://www.psacard.com/cert/108755543",
+    "secure_scan_confirmed_available": false
+  },
+  "psa_owner_reported_sales_history": {
+    "grade": "10",
+    "source": "Owner-pasted PSA Sales History UI",
+    "price_currency": "USD",
+    "psa_reported_last_sold": 1825,
+    "psa_reported_average": 1474.02,
+    "psa_reported_low": 940,
+    "psa_reported_high": 2099.26,
+    "rows": [
+      {
+        "sale_date": "2026-10-21",
+        "gross_reported": 1825,
+        "marketplace": "eBay",
+        "sale_type": "Auction",
+        "lot_id": "307228435607"
+      },
+      {
+        "sale_date": "2026-10-21",
+        "gross_reported": 1725,
+        "marketplace": "eBay",
+        "sale_type": "Auction",
+        "lot_id": "800795877708"
+      },
+      {
+        "sale_date": "2026-10-20",
+        "gross_reported": 1995.6,
+        "marketplace": "eBay",
+        "sale_type": "Fixed Price",
+        "lot_id": "327406749204"
+      },
+      {
+        "sale_date": "2026-10-17",
+        "gross_reported": 1697.43,
+        "marketplace": "eBay",
+        "sale_type": "Auction",
+        "lot_id": "206616977459"
+      },
+      {
+        "sale_date": "2026-10-08",
+        "gross_reported": 1700,
+        "marketplace": "eBay",
+        "sale_type": "Best Offer",
+        "lot_id": "298729654263"
+      }
+    ],
+    "recent_five_median": 1725,
+    "recent_five_arithmetic_mean": 1788.606,
+    "all_transactions_verified_paid_and_unreversed": false,
+    "condition_note": "PSA figure is before sale fees, taxes and grading; best-offer price is provider-reported and should be checked."
+  },
+  "ebay_seller_hub_owner_reported": {
+    "source": "Owner-pasted Product Research exact long query, last 30 days",
+    "query": "2001 Pokemon Entei 34 Reverse Foil PSA 10",
+    "rows": [
+      {
+        "sale_date": "2026-10-02",
+        "gross_reported": 1125,
+        "format": "Auction"
+      },
+      {
+        "sale_date": "2026-10-03",
+        "gross_reported": 1500,
+        "format": "Fixed price"
+      }
+    ],
+    "warning": "Keyword restrictions and coverage can omit newer transactions; do not assume comprehensive history."
+  },
+  "alt_owner_reported": {
+    "source": "Owner-pasted ALT recent-transaction screen",
+    "rows": [
+      {
+        "sale_date": "2026-10-21",
+        "reported": 1825
+      },
+      {
+        "sale_date": "2026-10-21",
+        "reported": 1725
+      },
+      {
+        "sale_date": "2026-10-20",
+        "reported": 1989
+      },
+      {
+        "sale_date": "2026-10-17",
+        "reported": 1697
+      }
+    ],
+    "warning": "ALT displayed rounded/different values. Match by item IDs before deduping or merging."
+  },
+  "test_protocol": {
+    "goal": "Check CompSniper PSA card API against individually dated PSA UI sales",
+    "api_search": "/v1/psa/search?keyword=Entei+34&count=20",
+    "api_card": "/v1/psa/card?specId=OPERATOR_VERIFIED_SPEC_ID&grade=10&count=50",
+    "required": "Check correct card identity and grade; verify at least 3 of the five PSA eBay lot IDs with exact prices before calling source a promising comps provider. Preserve all misses. Lack of exact match is not proof of erroneous data since coverage differs.",
+    "no_grade_conversion_odds": true,
+    "no_automatic_purchase": true
+  },
+  "research_conclusions": {
+    "successful_psa9_to_psa10_conversion_rate": null,
+    "trade_approved": false,
+    "images_supplied_by_compsniper_psa_card_api": "NOT_DOCUMENTED",
+    "cert_images_source": "PSA cert verification/SecureScan when legitimately available"
+  }
+}

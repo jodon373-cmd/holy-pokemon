@@ -16,8 +16,12 @@ The **Marketplace Insights** history API is a restricted / limited release; do n
 
 Build an **offline-first sold-import workflow** to accept user-provided exports and screenshots/PDFs (manual transcription/approved use), eBay Product Research findings, PSA's “sales of similar items” where legally usable, self-owned sold inventory exports, and approved provider CSVs. Each row must preserve image or source pointer, exact variant, transaction date, price basis, fee status, sale venue, seller authenticity, dedup key and confidence. A market summary/index is NOT a sale transaction. Refuse to mint fictitious individual sales from an aggregate or video.
 
+## CompSniper optional sold-comps provider (2026-10-29)
+
+[Integration and source-specific caveats](COMPSNIPER_COMPS_AND_PSA_IMAGE_INTEGRATION.md). CompSniper documents PSA `/v1/psa/search`, `/v1/psa/card`, `/v1/psa/sets`, `/v1/psa/set`; eBay `/v1/research/sold` up to three years, `/v1/scrape` recent sold, and `/v1/best-offer-prices`. The GitHub baseline now has the opt-in `holy_pokemon/compsniper.py` adapter and offline mocked tests, not proven live authorization or complete Mac UI integration. Filter exact grade and card variant; `listing_aggregate` is never an individual transaction; accepted-offer price only confirmed when status is `found`. CompSniper does NOT document PSA SecureScan-quality high-res images. A paid subscription is not pre-authorized; start with the free quota only after owner supplies key.
+
 ## PSA API / PSA Vault
-PSA's published public API has certificate verification by cert number, not a general-purpose PSA Vault sold-market feed. PSA Vault has listing and sales experiences but no universal public data API is assumed. Model it as `psa_vault_manual_import` and upgrade to a separate adapter **only if authorized, published API access is established**.
+PSA's published public API has certificate verification by cert number, not a general-purpose PSA Vault sold-market feed. **Owner tested an official generated token on 2026-10-28, and cert GetByCertNumber returned HTTP 403: Access to this API is limited to approved customers.** Approval and licensing inquiry was emailed to the official PSA API team. No approval or authorized live PSA API access is established. PSA Vault has listing and sales experiences but no universal public data API is assumed. Model it as `psa_vault_manual_import` and upgrade to a separate adapter **only if authorized, published API access is established**.
 - https://www.psacard.com/publicapi/documentation
 - https://www.psacard.com/cert
 

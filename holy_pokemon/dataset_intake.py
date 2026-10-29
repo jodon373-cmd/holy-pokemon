@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import collections
+import csv as _csv
 import csv
 import hashlib
 import json
@@ -269,6 +270,40 @@ def write_report(destination, payload):
     return path
 
 
+def export_training_manifest(audit_report, destination):
+    """Bridge only VERIFIED pre-buy specimens to vision_training.read_manifest.
+
+    The existing trainer uses individual images as examples; two images per
+    specimen are exported with one shared ID. Splitting remains grouped by
+    source_video_id, and mixed-source specimens must be resolved first.
+    """
+    if audit_report.get("status") != "AUDITED_ONLY_NOT_TRAINED":
+        raise ValueError("Expected audited data, not an arbitrary JSON manifest")
+    eligible = audit_report.get("eligible", [])
+    root = Path(audit_report["images_root"])
+    fields = ("grader", "grade", "rights_basis", "rights_evidence",
+              "card_only_verified", "pre_decision_visible",
+              "physical_specimen_id", "source_video_id", "image_path")
+    dest = Path(destination)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    with open(dest, "w", encoding="utf-8", newline="") as handle:
+        writer = _csv.DictWriter(handle, fieldnames=fields)
+        writer.writeheader()
+        for specimen in eligible:
+            for side in ("front", "back"):
+                writer.writerow({
+                    "grader": specimen["grader"], "grade": specimen["observed_grade"],
+                    "rights_basis": specimen["rights_basis"],
+                    "rights_evidence": specimen["rights_evidence"],
+                    "card_only_verified": "true", "pre_decision_visible": "true",
+                    "physical_specimen_id": specimen["specimen_id"],
+                    "source_video_id": specimen["source_id"],
+                    "image_path": str((root / specimen["image_pair"][side]["local_relative_path"]).resolve()),
+                })
+    return {"file": str(dest), "verified_specimens": len(eligible),
+            "image_rows": 2 * len(eligible), "model_trained": False}
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
@@ -281,12 +316,15 @@ def main(argv=None):
     p.add_argument("--images-root", required=True)
     p.add_argument("--min-side", type=int, default=500)
     p.add_argument("--out", required=True)
+    p.add_argument("--training-manifest-out", help="Export only fully audited pairs for existing vision_training trainer")
     args = parser.parse_args(argv)
     if args.command == "audit":
         payload = audit(args.manifest, args.images_root, args.min_side)
     else:
         payload = inventory(args.command.split("-")[1], args.csv)
     dest = write_report(args.out, payload)
+    if args.command == "audit" and args.training_manifest_out:
+        export_training_manifest(payload, args.training_manifest_out)
     print(json.dumps({"report": str(dest), "counts": payload.get("counts"),
                       "eligible_training_rows": len(payload.get("eligible", []))}))
 

@@ -1,0 +1,140 @@
+{
+  "version": "holy_pokemon_arbitrage_evidence_registry_v1",
+  "date": "2026-10-29",
+  "privacy": "Reference paths only; do not rehost creator media or copyrighted card photographs.",
+  "policies": {
+    "actual_sale": "Dated transactional sale data with exact identity, provider original record and price basis.",
+    "source_reported_sale": "PriceCharting-reported completed-sale record; NOT independently verified final payout, provenance needs confirmation before trading.",
+    "guide": "Single aggregate reference estimate NOT an individual sold comp, never PSA9 when labelled generic Grade9.",
+    "active_ask": "Seller's current/historical asking price, not actual sold; unknown if live without fresh authorized check.",
+    "population": "Number and ratio of graded population by provider and cohort, not observed PSA9→CGC10 conversion rate.",
+    "creator_case": "Narrated actual grade path; profit may contain unsold estimates; overlapping evidence across episodes.",
+    "specimen": "A unique physical card; distinct from named card/grade/class and from submission and transaction."
+  },
+  "records": [
+    {
+      "id": "jungle_anchor",
+      "file": "research/jungle_2026/README.md",
+      "url": "https://www.pricecharting.com/console/pokemon-jungle",
+      "status": "REFERENCE_ANCHOR_NOT_LIVE_SEARCH_RESULTS"
+    },
+    {
+      "id": "jungle_64_variants",
+      "file": "research/jungle_2026/all_64_cards_and_special_variants.csv",
+      "records": 152,
+      "status": "CATALOG_QUERY_IDENTITIES_UNAUDITED_ERROR_SUBVARIANTS"
+    },
+    {
+      "id": "jungle_pop",
+      "file": "research/jungle_2026/holo_variant_population_and_reference_prices.csv",
+      "records": 48,
+      "status": "HISTORICAL_POPULATION_AND_GUIDE_REFERENCES"
+    },
+    {
+      "id": "jungle_sold",
+      "file": "research/jungle_2026/dated_reported_sold_comps.csv",
+      "records": 60,
+      "status": "MIXED_SOURCE_REPORTED_SALES_DIRECT_AND_REPORTED_VERIFY_AT_APPROVAL"
+    },
+    {
+      "id": "jungle_conditional_examples",
+      "file": "research/jungle_2026/illustrative_two_outcome_sensitivity_NOT_QUOTES.csv",
+      "records": 13,
+      "status": "HYPOTHETICAL_COST_INPUTS_NOT_ACTUAL_QUOTES"
+    },
+    {
+      "id": "jungle_search",
+      "file": "research/jungle_2026/authorized_discovery_searches.json",
+      "records": 39,
+      "status": "UNEXECUTED_EXAMPLE_QUERIES"
+    },
+    {
+      "id": "jungle_listing_snapshots",
+      "file": "research/jungle_2026/historical_listing_inspection_queue.csv",
+      "records": 6,
+      "status": "HISTORICAL_SELLER_ASKS_NOT_LIVE"
+    },
+    {
+      "id": "promo_anchor",
+      "file": "research/pokemon_promo_priority.json",
+      "url": "https://www.pricecharting.com/console/pokemon-promo",
+      "status": "REFERENCE_CATEGORY_NOT_LIVE_SEARCH_RESULTS"
+    },
+    {
+      "id": "promo_sold",
+      "file": "research/pokemon_promo_reported_sold_comps_2026-10-29.csv",
+      "records": 12,
+      "status": "SOURCE_REPORTED_SALES_NOT_INDEPENDENT_FINAL_PAYOUT"
+    },
+    {
+      "id": "crossset_pop",
+      "file": "research/cross_set_gap_2026/populations_and_guide_references.csv",
+      "records": 12,
+      "status": "HISTORICAL_POPULATION_AND_BLENDED_GRADE9_GUIDE"
+    },
+    {
+      "id": "crossset_sold",
+      "file": "research/cross_set_gap_2026/dated_source_reported_sales.csv",
+      "records": 38,
+      "status": "SOURCE_REPORTED_SALES_NOT_INDEPENDENT_FINAL_PAYOUT"
+    },
+    {
+      "id": "crossset_search",
+      "file": "research/cross_set_gap_2026/bounded_exact_card_search_queue.json",
+      "records": 10,
+      "status": "UNEXECUTED_EXAMPLE_QUERIES_NOT_SCOPE_LIMITS"
+    },
+    {
+      "id": "fredy_546",
+      "url": "https://www.youtube.com/watch?v=00qFtZz6eZU",
+      "file": "research/FULL_SOURCE_TRANSPORT.md",
+      "status": "CREATOR_SELECTED_COHORT_OVERLAP_OTHER_VIDEOS",
+      "claim": {
+        "psa9_total": 178,
+        "psa9_cgc10_inclusive": 86,
+        "psa9_cgc_pristine10": 14,
+        "psa8_total": 306,
+        "psa8_cgc10_inclusive": 72,
+        "psa8_pristine10": 4,
+        "all_total": 546,
+        "cgc10_inclusive": 162,
+        "pristine10": 18
+      }
+    },
+    {
+      "id": "fredy_gemrate_era",
+      "url": "https://www.youtube.com/watch?v=XmaISDa55DM",
+      "file": "research/FULL_SOURCE_TRANSPORT.md",
+      "status": "CREATOR_ERA_COMPARISON_NOT_PER_SET_PROBABILITY",
+      "claim": {
+        "all_psa_gem_rate_pct_reported": 51.3,
+        "all_cgc10_inclusive_gem_rate_pct_reported": 51.6,
+        "era_cgc_outperformance": "2010-2019 sometimes ~20 percentage points; not every card"
+      }
+    },
+    {
+      "id": "open_routes",
+      "file": "research/strategy_discovery/routes.json",
+      "records": 13,
+      "status": "HYPOTHESES_NOT_PROVEN_EDGES"
+    },
+    {
+      "id": "open_explorer",
+      "file": "holy_pokemon/open_strategy_discovery.py",
+      "status": "OFFLINE_QUERY_GENERATOR_NO_PROVIDER_SEARCH"
+    }
+  ],
+  "not_verified": [
+    "Current active listing counts (particularly >=100 PSA9 listings)",
+    "Live graded-card availability and seller acceptance of offers",
+    "Individual per-set conditional PSA9-to-CGC10 probabilities",
+    "Final settlement prices and exact cert-to-cert links for many PriceCharting reports",
+    "Existing original media available in GitHub (large Fredy media stays Mac-local)",
+    "Current producer API access/terms for automated historical sold research",
+    "Independent vintage 8/9/10 photo model calibration",
+    "Census Gem Mint versus Pristine subtype matching for all reports",
+    "Actual CGC grading and crossovers current price quotes"
+  ],
+  "never_autopromote_to_trade": true,
+  "live_dashboard_integration_status": "NOT_VERIFIED; GitHub main does not establish running Mac checkout state"
+}

@@ -2,6 +2,12 @@
 **Authority:** owner-approved build order, 2026-10-28.
 **Target:** the EXISTING PRIVATE repository jodon373-cmd/holy-pokemon, checked out locally on the owner's Mac, with the previously linked Fredy Results source directory. This is an EXECUTION CONTRACT, not a request for a plan, a research essay, or a scaffold. Implement the complete product to the limits of accessible evidence and authorized APIs, test it, and report exact completion honestly.
 
+### 2026-10-29 strategic discovery extension (part of THIS contract, not a second prompt)
+
+The owner explicitly requires **unrestricted discovery across all Pokémon card sets, eras, languages, variants, grading holders, marketplaces and newly invented evidence-backed arbitrage routes**, not just fixed Jungle/Fossil/Promo/Gym shortlist cards. Read `docs/OPEN_ENDED_ARBITRAGE_DISCOVERY.md`, `research/strategy_discovery/evidence_manifest.json`, `research/strategy_discovery/routes.json` and the existing Jungle, Promo and cross-set source directories. Reuse their source-backed data, negative examples and local offline ranking/generation code; expand to **NEW hypotheses** instead of merely repeating the identified winners. The repo already contains 64 Jungle base cards / 152 identity search variants, 48 Jungle holo population/guide rows, 60 Jungle dated sale observations, 12 Promo source-reported sales, 12 cross-set population rows, 38 cross-set dated sale records and Fredy's historic study references. These counts are **not** current listings or completed unique crossover cases. Preserve fine-grained source status; **no fictional prices, conversion probabilities, verified certs or offers**.
+
+**Execution scope/credits/limits are to be specified by the owner separately for the particular Codex run.** Do not treat example four-query batching or ten top-card queues as universe caps. Do not run paid/unapproved APIs, violate provider quotas or execute any purchase. Preserve the newer local Mac app; don't replace it with the older GitHub foundation. This extension augments rather than supersedes the rest of this execution contract.
+
 ## A. SINGLE SOURCE OF DIRECTION — EFFICIENT CODEX USAGE
 
 This file supersedes older launch prompts as the EXECUTION ENTRYPOINT. Existing detail specifications remain informative, not competing orders:

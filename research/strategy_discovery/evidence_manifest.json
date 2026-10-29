@@ -122,6 +122,30 @@
       "id": "open_explorer",
       "file": "holy_pokemon/open_strategy_discovery.py",
       "status": "OFFLINE_QUERY_GENERATOR_NO_PROVIDER_SEARCH"
+    },
+    {
+      "id": "psa_entei_owner_ui_oct_2026",
+      "file": "research/strategy_discovery/psa_entei_34_comp_provider_benchmark_2026-10-29.json",
+      "status": "OWNER_SUPPLIED_PSA_EBAY_ALT_TRANSACTIONS_NOT_API_VALIDATED",
+      "notes": "Exact WOTC promo Entei #34 reverse foil PSA9→PSA10; October 2026 PSA history items reported with identifiers; compare third-party provider response before assigning trust."
+    },
+    {
+      "id": "compsniper_documented_api",
+      "file": "docs/COMPSNIPER_COMPS_AND_PSA_IMAGE_INTEGRATION.md",
+      "url": "https://api.compsniper.com/docs/psa",
+      "status": "DOCUMENTED_THIRD_PARTY_API_NOT_AUTHENTICATED_LIVE_TEST",
+      "notes": "Exact-grade comps and populations; no documented professional PSA SecureScan image endpoint; free 100/mo request allowance is vendor-advertised and not an owner connection."
+    },
+    {
+      "id": "psa_public_cert_access_owner_403",
+      "url": "https://www.psacard.com/publicapi/documentation",
+      "status": "OWNER_TESTED_HTTP_403_APPROVED_CUSTOMERS_ONLY_2026_10_28",
+      "notes": "Owner generated token but approval is required. Email to PSA API team for entitlement and licensed Auction Prices feed pending; cannot claim authorized connection."
+    },
+    {
+      "id": "compsniper_client",
+      "file": "holy_pokemon/compsniper.py",
+      "status": "GITHUB_READ_ONLY_ADAPTER_MOCKED_TESTS_NO_LIVE_CREDENTIAL_VALIDATION"
     }
   ],
   "not_verified": [
@@ -133,7 +157,9 @@
     "Current producer API access/terms for automated historical sold research",
     "Independent vintage 8/9/10 photo model calibration",
     "Census Gem Mint versus Pristine subtype matching for all reports",
-    "Actual CGC grading and crossovers current price quotes"
+    "Actual CGC grading and crossovers current price quotes",
+    "CompSniper actual PSA sale-history coverage, response freshness, and PSA SecureScan photograph availability",
+    "PSA public API approval for the owner's account (403 received October 28)"
   ],
   "never_autopromote_to_trade": true,
   "live_dashboard_integration_status": "NOT_VERIFIED; GitHub main does not establish running Mac checkout state"

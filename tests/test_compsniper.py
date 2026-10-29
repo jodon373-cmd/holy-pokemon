@@ -7,6 +7,7 @@ from unittest.mock import patch
 
 from holy_pokemon.compsniper import (
     CompSniperClient, normalize_psa_sales, normalize_research_history,
+    normalize_recent_sold,
     money, psa_cert_url, safe_source_url, main
 )
 
@@ -106,6 +107,33 @@ class CompSniperTests(unittest.TestCase):
             self.assertEqual(offline.calls, 0)
             all_content = "".join(p.read_text() for p in Path(temp).glob("*.json"))
             self.assertNotIn("cs_live_TEST_SECRET", all_content)
+
+    def test_recent_best_offer_prices_are_not_falsified(self):
+        results = normalize_recent_sold({"items": [
+            {"title": "2001 Entei PSA 10", "url": "https://www.ebay.com/itm/307228435607",
+             "itemId": "307228435607", "endedAt": "2026-10-21T12:00:00Z",
+             "soldCurrency": "USD", "soldPrice": "1995.60",
+             "bestOfferAccepted": True, "acceptedOfferPriceStatus": "pending",
+             "acceptedOfferPrice": None, "fullResThumbnailUrl": "https://i.ebayimg.com/test.jpg"},
+            {"title": "2001 Entei PSA 10", "url": "https://www.ebay.com/itm/307228435608",
+             "itemId": "307228435608", "endedAt": "2026-10-21T12:00:00Z",
+             "soldCurrency": "USD", "soldPrice": "1995.60",
+             "bestOfferAccepted": True, "acceptedOfferPriceStatus": "found",
+             "acceptedOfferPrice": "1725.00"},
+            {"title": "2001 Entei PSA 10", "url": "https://www.ebay.com/itm/307228435609",
+             "itemId": "307228435609", "endedAt": "2026-10-21T12:00:00Z",
+             "soldCurrency": "USD", "soldPrice": "1825.00", "bestOfferAccepted": None},
+        ]})
+        rows = results["records_needing_variant_validation"]
+        self.assertEqual(len(rows), 3)
+        self.assertIsNone(rows[0]["transaction_price_usd_reported"])
+        self.assertFalse(rows[0]["price_resolved"])
+        self.assertEqual(rows[1]["transaction_price_usd_reported"], "1725.00")
+        self.assertEqual(rows[2]["transaction_price_usd_reported"], "1825.00")
+        self.assertFalse(any(r["trade_approved"] for r in rows))
+        self.assertEqual(rows[0]["image_source_type"],
+                         "EBAY_MARKETPLACE_IMAGE_NOT_PSA_SECURESCAN")
+
 
     def test_input_validation(self):
         self.assertIsNone(money("NaN"))

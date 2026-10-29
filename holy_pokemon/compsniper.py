@@ -192,6 +192,61 @@ def normalize_research_history(payload):
             "listings_are_not_unique_transactions": True, "trade_approved": False}
 
 
+def normalize_recent_sold(payload):
+    """Keep exact accepted-offer price semantics; no automatic variant approval.
+
+    Best Offer rows with pending/unavailable accepted price are UNKNOWN, not
+    verified transactions at the displayed listing price.
+    """
+    records, rejected = [], {}
+    if not isinstance(payload, dict) or not isinstance(payload.get("items"), list):
+        raise ValueError("Unexpected recent-sold response")
+    for row in payload["items"]:
+        if not isinstance(row, dict):
+            rejected["malformed"] = rejected.get("malformed", 0) + 1
+            continue
+        link = safe_source_url(row.get("url"))
+        date = iso_date(row.get("endedAt"))
+        title = str(row.get("title") or "").strip()
+        if not link or not date or not title:
+            rejected["missing_source_date_or_title"] = rejected.get("missing_source_date_or_title", 0) + 1
+            continue
+        currency = row.get("soldCurrency")
+        if currency != "USD":
+            rejected["not_usd"] = rejected.get("not_usd", 0) + 1
+            continue
+        listed = money(row.get("soldPrice"))
+        if listed is None:
+            rejected["no_listed_sale_price"] = rejected.get("no_listed_sale_price", 0) + 1
+            continue
+        offer = row.get("bestOfferAccepted") is True
+        status = row.get("acceptedOfferPriceStatus")
+        accepted = money(row.get("acceptedOfferPrice")) if status == "found" else None
+        has_resolved_price = (not offer or accepted is not None)
+        records.append({
+            "provider": "compsniper_recent_ebay_sold",
+            "source_url": link, "item_id": str(row.get("itemId") or ""),
+            "title": title, "ended_at_utc": date,
+            "listing_price_usd": str(listed),
+            "best_offer_accepted": offer,
+            "accepted_offer_status": status if offer else None,
+            "accepted_offer_price_usd": str(accepted) if accepted is not None else None,
+            "transaction_price_usd_reported": str(accepted) if accepted is not None
+                else (str(listed) if not offer else None),
+            "price_basis": "THIRD_PARTY_REPORTED_ACCEPTED_OFFER" if accepted is not None
+                else ("UNKNOWN_PENDING_OR_UNAVAILABLE_BEST_OFFER" if offer
+                      else "THIRD_PARTY_REPORTED_SOLD_PRICE"),
+            "title_variant_and_grade_verified": False,
+            "price_resolved": has_resolved_price,
+            "trade_approved": False,
+            "image_source_url": safe_source_url(row.get("fullResThumbnailUrl"))
+                or safe_source_url(row.get("thumbnailUrl")),
+            "image_source_type": "EBAY_MARKETPLACE_IMAGE_NOT_PSA_SECURESCAN",
+        })
+    return {"records_needing_variant_validation": records,
+            "rejection_counts": rejected, "trade_approved": False}
+
+
 class CompSniperClient:
     """Constrained, read-only provider calls with TTL cache and request budgeting."""
     def __init__(self, *, live=False, key=None, max_calls=3,
@@ -312,8 +367,7 @@ def main(argv=None):
         report = normalize_research_history(client.research_history(args.history,
                                                                     start=args.start, end=args.end))
     else:
-        report = {"source": "compsniper_recent_sold", "identity_and_grade_review_required": True,
-                  "raw": client.recent_sold(args.recent), "trade_approved": False}
+        report = normalize_recent_sold(client.recent_sold(args.recent))
     if args.output:
         p = Path(args.output)
         p.parent.mkdir(parents=True, exist_ok=True)

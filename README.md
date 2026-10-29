@@ -10,6 +10,10 @@
 
 Includes Jungle (all 64 base cards and 152 search variants), Pokémon Promos, cross-set Fossil/Base Set 2/Team Rocket/Gym Heroes/Neo/2010s comparisons, source-reported completed sales, FredyCards' 546-card PSA→CGC cohort, two-year grading-era trends and counterexamples. **The current shortlists are discovery seeds, not restrictions.** Codex can investigate wholly new sets/cards/strategies or import an arbitrary card universe with `python3 -m holy_pokemon.open_strategy_discovery --universe path/to/new_cards.csv`. This merely generates research queries; no live APIs are called, no current prices or grade-conversion odds are invented. **Owner sets Codex execution/credit/query limits in the next assignment**, not this repository. Preserve conservative research vs manual trade-approval separation. GitHub additions are not guaranteed to be integrated into the newer running Mac app.
 
+## CompSniper sold comps + PSA high-resolution condition images (2026-10-29)
+
+**[Full API/image integration handoff](docs/COMPSNIPER_COMPS_AND_PSA_IMAGE_INTEGRATION.md)** covers CompSniper PSA prices, sets, populations, recent sales, three-year eBay history, accepted Best Offer statuses, and the Entei #34 PSA9→PSA10 owner-supplied October 2026 sale benchmark. An opt-in read-only Python adapter with dry run and mocked tests is committed as `holy_pokemon/compsniper.py`. It needs an owner-created API key for the first live test and integration into the newer Mac app. **No verified live CompSniper calls have run.** CompSniper does **not** document PSA SecureScan-quality scans; those must come from separate legitimately available PSA cert records or user-provided images. Official PSA API is currently blocked by HTTP 403 pending customer approval.
+
 ## North star
 Discover overlooked listings across Pokémon eras, grades, languages and slab companies; evaluate the actual card condition and regrading pathways; compare expected resale outcomes with real current sold-price evidence; and show research leads and verified trade opportunities separately.
 

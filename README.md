@@ -14,6 +14,12 @@ Includes Jungle (all 64 base cards and 152 search variants), Pokémon Promos, cr
 
 **[Full API/image integration handoff](docs/COMPSNIPER_COMPS_AND_PSA_IMAGE_INTEGRATION.md)** covers CompSniper PSA prices, sets, populations, recent sales, three-year eBay history, accepted Best Offer statuses, and the Entei #34 PSA9→PSA10 owner-supplied October 2026 sale benchmark. An opt-in read-only Python adapter with dry run and mocked tests is committed as `holy_pokemon/compsniper.py`. It needs an owner-created API key for the first live test and integration into the newer Mac app. **No verified live CompSniper calls have run.** CompSniper does **not** document PSA SecureScan-quality scans; those must come from separate legitimately available PSA cert records or user-provided images. Official PSA API is currently blocked by HTTP 403 pending customer approval.
 
+## Centering v2 + saved 645-listing backtest (2026-10-29)
+
+**[Centering implementation and Mac replay guide](docs/CENTERING_V2_645_BACKTEST.md)** · [Detector](holy_pokemon/centering_v2.py) · [Local replay tool](holy_pokemon/centering_backtest.py) · [Offline tests](tests/test_centering_v2.py).
+
+Project now includes separate outer-card vs. printed-border geometry, perspective correction, multi-sample border consensus, honest abstentions, hash-checked resume cache, and an auditable replay for all **645 existing Mac-local** IDs. Default research target: **PSA 9 asks ≤$500**; higher-priced cards only enter a pending premium-exception lane until exceptional centering, condition, exact sales and costs are verified. Local full-universe centering precedes any paid AI grading of financially ranked favorites. **No real 645-photo v2 backtest has yet been executed on GitHub**; its source assets remain in the owner's newer Mac checkout. No expensive image API or eBay calls required for replay.
+
 ## North star
 Discover overlooked listings across Pokémon eras, grades, languages and slab companies; evaluate the actual card condition and regrading pathways; compare expected resale outcomes with real current sold-price evidence; and show research leads and verified trade opportunities separately.
 

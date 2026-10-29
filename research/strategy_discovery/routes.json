@@ -1,0 +1,202 @@
+{
+  "version": "open_arbitrage_route_registry_v1",
+  "updated": "2026-10-29",
+  "scope": "Research any defensible Pokemon card/era/edition/market/grade pathway; not limited to the included cases.",
+  "research_only": true,
+  "trade_approval_required": true,
+  "unlimited_future_discovery": true,
+  "owner_controls": "Any future Codex budget, credits, provider rate limits, scan scope, runtime and prompt constraints will be specified by the owner, not inferred here. Network and paid access still require authorization.",
+  "routes": [
+    {
+      "id": "psa9_to_cgc_gem10",
+      "origin": {
+        "grader": "PSA",
+        "grade": "9"
+      },
+      "destination": {
+        "grader": "CGC",
+        "grade": "Gem Mint 10"
+      },
+      "origin_query": "PSA 9",
+      "exit_query": "CGC Gem Mint 10",
+      "focus": "Primary multi-set opportunity; examine actual CGC Gem sales, downgrade risk, vintage and 2010s."
+    },
+    {
+      "id": "psa8_to_cgc_gem10",
+      "origin": {
+        "grader": "PSA",
+        "grade": "8"
+      },
+      "destination": {
+        "grader": "CGC",
+        "grade": "Gem Mint 10"
+      },
+      "origin_query": "PSA 8",
+      "exit_query": "CGC Gem Mint 10",
+      "focus": "Lower-priced upside; stronger need for microscopic surface inspection and downgrade fallback."
+    },
+    {
+      "id": "psa9_to_cgc_pristine10",
+      "origin": {
+        "grader": "PSA",
+        "grade": "9"
+      },
+      "destination": {
+        "grader": "CGC",
+        "grade": "Pristine 10"
+      },
+      "origin_query": "PSA 9",
+      "exit_query": "CGC Pristine 10",
+      "focus": "High variance and rare; keep Pristine comps separate, not baseline."
+    },
+    {
+      "id": "psa9_to_psa10_regrade",
+      "origin": {
+        "grader": "PSA",
+        "grade": "9"
+      },
+      "destination": {
+        "grader": "PSA",
+        "grade": "10"
+      },
+      "origin_query": "PSA 9",
+      "exit_query": "PSA 10",
+      "focus": "Different route from CGC; crack, reholder or review policies must be checked."
+    },
+    {
+      "id": "cgc_legacy95_to_psa10",
+      "origin": {
+        "grader": "CGC",
+        "grade": "legacy blue label 9.5"
+      },
+      "destination": {
+        "grader": "PSA",
+        "grade": "10"
+      },
+      "origin_query": "CGC old blue label 9.5",
+      "exit_query": "PSA 10",
+      "focus": "Old label 9.5 is not automatically new Gem10; subgrades and era critical."
+    },
+    {
+      "id": "cgc_legacy95_to_cgc_gem10",
+      "origin": {
+        "grader": "CGC",
+        "grade": "legacy blue label 9.5"
+      },
+      "destination": {
+        "grader": "CGC",
+        "grade": "Gem Mint 10"
+      },
+      "origin_query": "CGC old blue label 9.5",
+      "exit_query": "CGC Gem Mint 10",
+      "focus": "Investigate reholder eligibility, grading treatment and changed label definitions; not an assumed automatic uplift."
+    },
+    {
+      "id": "bgs95_to_psa10",
+      "origin": {
+        "grader": "BGS",
+        "grade": "9.5"
+      },
+      "destination": {
+        "grader": "PSA",
+        "grade": "10"
+      },
+      "origin_query": "BGS 9.5",
+      "exit_query": "PSA 10",
+      "focus": "Examine BGS subgrades, authenticity, and pre- versus post-2020 specimens."
+    },
+    {
+      "id": "bgs95_to_cgc_gem10",
+      "origin": {
+        "grader": "BGS",
+        "grade": "9.5"
+      },
+      "destination": {
+        "grader": "CGC",
+        "grade": "Gem Mint 10"
+      },
+      "origin_query": "BGS 9.5",
+      "exit_query": "CGC Gem Mint 10",
+      "focus": "May be relevant to strong condition with poor PSA economics; separate all grading pathways."
+    },
+    {
+      "id": "cgc9_to_cgc_gem10",
+      "origin": {
+        "grader": "CGC",
+        "grade": "9"
+      },
+      "destination": {
+        "grader": "CGC",
+        "grade": "Gem Mint 10"
+      },
+      "origin_query": "CGC 9",
+      "exit_query": "CGC Gem Mint 10",
+      "focus": "Same-company regrade quality disagreement; record repeated submission attempts separately."
+    },
+    {
+      "id": "raw_to_psa10",
+      "origin": {
+        "grader": "RAW",
+        "grade": "ungraded"
+      },
+      "destination": {
+        "grader": "PSA",
+        "grade": "10"
+      },
+      "origin_query": "raw ungraded",
+      "exit_query": "PSA 10",
+      "focus": "Requires photo audit, authenticity, unseen surface checks and no false grade prediction."
+    },
+    {
+      "id": "raw_to_cgc_gem10",
+      "origin": {
+        "grader": "RAW",
+        "grade": "ungraded"
+      },
+      "destination": {
+        "grader": "CGC",
+        "grade": "Gem Mint 10"
+      },
+      "origin_query": "raw ungraded",
+      "exit_query": "CGC Gem Mint 10",
+      "focus": "Separate from slab crossovers; authenticity, surface, and shipping downside."
+    },
+    {
+      "id": "same_grade_label_venue_misprice",
+      "origin": {
+        "grader": "ANY",
+        "grade": "existing graded slab"
+      },
+      "destination": {
+        "grader": "SAME",
+        "grade": "sell same slab"
+      },
+      "origin_query": "graded slab",
+      "exit_query": "exact same graded slab sold",
+      "focus": "No upgrade needed; price discrepancy across marketplace or holder labels; listing authenticity and fees."
+    },
+    {
+      "id": "psa_vault_misprice",
+      "origin": {
+        "grader": "PSA",
+        "grade": "verified Vault/eligible"
+      },
+      "destination": {
+        "grader": "PSA",
+        "grade": "same grade exit"
+      },
+      "origin_query": "PSA vault eligible",
+      "exit_query": "PSA Vault consignment",
+      "focus": "Vault custody, official fee schedule, consignment/payout and restrictions must be confirmed."
+    }
+  ],
+  "route_standards": [
+    "No same-card conversion probability from population ratios",
+    "Grade/holder/edition/finish/language/card number must match each sale",
+    "PSA Grade 9 blended guides are not PSA9 completed sales",
+    "CGC Gem Mint 10 and Pristine 10 sales remain separate",
+    "A seller ask is not a completed sale",
+    "Acquisition, fees, taxes, upcharges, authenticity, grading fallback and time-to-sale needed",
+    "No paid access, scraping bypass, buying, cracking or auto-offers without owner authorization"
+  ]
+}

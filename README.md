@@ -109,19 +109,20 @@ For unattended local batches:
 .venv/bin/python -m holy_pokemon.centering_tool --image /path/front.jpg --image /path/back.jpg --output outputs/automatic-centering.json
 ```
 
-V3.2 uses supported physical border color plus straight-edge evidence to avoid
+V3.3 uses supported physical border color plus straight-edge evidence to avoid
 slab/frame confusion. Rounded tips no longer pull physical corners inward.
 Front sampling uses the outer border color and rejects deeper artwork edges.
-Blue backs and observable yellow-border fronts are supported. Full-art, silver,
+Blue backs and observable yellow/silver-border fronts are supported. Borderless full-art,
 e-reader and obscured borders can abstain; this is not universal design coverage.
 Original photos are never changed or uploaded.
 
 The reproducible known-PSA10 diagnostic is in `research/centering_v3/`:
-six photos of four specimens, **three automatically measured and within their
+seven photos of five specimens, **four automatically measured and within their
 side's screening band, three abstentions**. The measured photos are Houndoom
 back (51.43/48.57 L/R, 54.32/45.68 T/B), Tyranitar back (49.28/50.72,
-46.43/53.57), and Jolteon front (48.98/51.02, 54/46). Front/back counts must
-not be presented as three completely evaluated specimens. Labels come from
+46.43/53.57), Jolteon front (48.98/51.02, 54/46), and Charmander silver-border front
+(53.85/46.15, 53.06/46.94). Front/back counts must
+not be presented as four completely evaluated specimens. Labels come from
 owner records or visible holders, not a fresh certificate API check. These are
 known-label diagnostics, not blind accuracy or final-grade predictions.
 
@@ -132,3 +133,18 @@ known-label diagnostics, not blind accuracy or final-grade predictions.
 The manifest pins immutable original hashes and references local photos without
 publishing them. Geometry helpers were reviewed and adapted from the owner's
 newer local `centering_v3.py`; that checkout was preserved unchanged.
+
+
+V3.3 adds automatic silver-frame front detection. Candidate rectangles are search
+windows; four neutral frame strips establish the physical and printed edges.
+Six or more spatial segments corroborate each silver edge. Multi-card windows
+are rejected. This avoids the earlier 70/30 false measurement on the saved
+Charmander front; it now measures 53.85/46.15 L/R and 53.06/46.94 T/B.
+
+The complete initial 24-photo front sample is also committed as manifests and
+results, including failures: 3 measured, 1 within the strict screening band,
+2 outside and 21 abstentions. Several pictures contain multiple slabs or have
+thin borders with very few native pixels. **Automatic front support exists but
+coverage is limited; the tool is not validated for arbitrary front designs.**
+Do not infer grading accuracy from passing software tests or tune the screening
+thresholds to make known grades pass. Local suite: 111 tests pass with no skips.

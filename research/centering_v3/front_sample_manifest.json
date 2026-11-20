@@ -1,0 +1,197 @@
+{
+  "scope": "All 24 initially selected front photos, including multi-card scenes and low resolution; metadata labels are not independent verification.",
+  "records": [
+    {
+      "id": "initial_sample_00_front",
+      "path": "research/local/graded/paco/images/ebay-psa10-0120689809.jpg",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "sha256": "dba58f4540e3fe456a9abfe9cddcb591fed70fc88524e5cd6fce09c3568b6caf"
+    },
+    {
+      "id": "initial_sample_01_front",
+      "path": "research/local/graded/paco/images/ebay-psa10-07bbb485ec.jpg",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "sha256": "74656bc1c66ed56f126cd08976920c98a183d2ee64417ae4c0014c35799c8f3f"
+    },
+    {
+      "id": "initial_sample_02_front",
+      "path": "research/local/graded/paco/images/ebay-psa10-0933c4573d.jpg",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "sha256": "9952650ef6ad28d0ddc0e939db3c03664963d5156a16f6618e21ef64b51a2a33"
+    },
+    {
+      "id": "initial_sample_03_front",
+      "path": "research/local/graded/paco/images/ebay-psa10-0b0ca06494.jpg",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "sha256": "e0d0d9377af48ccbc4376095a6d1373c9ed2c09c18fa0fffa990b6b3635d0d85"
+    },
+    {
+      "id": "initial_sample_04_front",
+      "path": "research/local/graded/paco/images/ebay-psa10-0deb11174f.jpg",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "sha256": "7d6c12eb7c5ea4009121bb2bae9122f9bb5f5304d035115d2f5a9669ee01eae4"
+    },
+    {
+      "id": "initial_sample_05_front",
+      "path": "research/local/graded/paco/images/ebay-psa10-0dfcd01dd1.jpg",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "sha256": "81d3391b2c19c37671a5297cb2087db63db22643f74e100c229ddd19c538af2a"
+    },
+    {
+      "id": "initial_sample_06_front",
+      "path": "research/local/graded/paco/images/ebay-psa10-0e8486596d.jpg",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "sha256": "d9b36aee0c3428a0cab7f9cccecc819eeec4761afafea5e60f8f1ead20ad4003"
+    },
+    {
+      "id": "initial_sample_07_front",
+      "path": "research/local/graded/paco/images/ebay-psa10-0f7d639e65.jpg",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "sha256": "96215c502a916dad8ab59c673ecdf279168578889301728eebc74dbf1deea921"
+    },
+    {
+      "id": "initial_sample_08_front",
+      "path": "research/local/graded/paco/images/ebay-psa10-12a4cd074e.jpg",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "sha256": "4d1a974faf0387e2d2cfcfe69e18574cf452b6ec96c08bb5af0d60bc1bb50437"
+    },
+    {
+      "id": "initial_sample_09_front",
+      "path": "research/local/graded/paco/images/ebay-psa10-134df77130.jpg",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "sha256": "d33bf91e7dae2f00c091d7d1b74d296c1730760d30a10f20400eae6022de7a1d"
+    },
+    {
+      "id": "initial_sample_10_front",
+      "path": "research/local/graded/paco/images/ebay-psa10-136d80b49c.jpg",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "sha256": "2f5b0452811d68e168825364cdab1de33cd98e7494710cb6a1c7d8afc68feb08"
+    },
+    {
+      "id": "initial_sample_11_front",
+      "path": "research/local/graded/paco/images/ebay-psa10-13ff55c2fe.jpg",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "sha256": "6ec8e84eaef76d963c80cdc61b34bd3e1ca3c85b6ff0ae554d504e17a46e525c"
+    },
+    {
+      "id": "initial_sample_12_front",
+      "path": "research/local/graded/paco/images/ebay-psa10-1402b08a62.jpg",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "sha256": "8b72f4a3e8f9b1acee73bc43818298e3543aabe970b45d00d41d136a77fb714c"
+    },
+    {
+      "id": "initial_sample_13_front",
+      "path": "research/local/graded/paco/images/ebay-psa10-154e04038d.jpg",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "sha256": "342f188e4e21e2ca90b88ad4a321bd08b50ea8b1e5b1ecccd6a2138ac90e1137"
+    },
+    {
+      "id": "initial_sample_14_front",
+      "path": "research/local/graded/paco/images/ebay-psa10-19ae2dde70.jpg",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "sha256": "834e9811fd30093e367b082b48c912f32934fdd88bc259537e7e50c988acb96e"
+    },
+    {
+      "id": "initial_sample_15_front",
+      "path": "research/local/graded/paco/images/ebay-psa10-1b0a50fd5a.jpg",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "sha256": "7e3569373465056d0a959fb7104ff0d16cbb9561db8dd6fa1b2d00e972c8de1a"
+    },
+    {
+      "id": "initial_sample_16_front",
+      "path": "research/local/graded/paco/images/ebay-psa10-1cb5626ec1.jpg",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "sha256": "4034a2a9980dfd19207a790edd17068422293d616c2493140f8542979c37eeef"
+    },
+    {
+      "id": "initial_sample_17_front",
+      "path": "research/local/graded/paco/images/ebay-psa10-204fecb71e.jpg",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "sha256": "a7df9876690dec1852e58358577455774b134cb6c02a49967b7e7a8a93f487d2"
+    },
+    {
+      "id": "initial_sample_18_front",
+      "path": "research/local/graded/paco/images/ebay-psa10-207cb653ae.jpg",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "sha256": "a5785b27a8e674d9ca82511756de76afce550ff3413b2bbb618f72560e98c1d6"
+    },
+    {
+      "id": "initial_sample_19_front",
+      "path": "research/local/graded/paco/images/ebay-psa10-2598dc8cbe.jpg",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "sha256": "bd0d56bcc51aa33db5c67c6c0b30c09f4a3f45648afd7a801966e606390e17ec"
+    },
+    {
+      "id": "initial_sample_20_front",
+      "path": "research/local/graded/paco/images/ebay-psa10-2670e325f6.jpg",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "sha256": "ce2ea48d6981f19adf4bd9a72042bb708b91189167a715518a0585672bb7a73d"
+    },
+    {
+      "id": "initial_sample_21_front",
+      "path": "research/local/graded/paco/images/ebay-psa10-29dd5a3446.jpg",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "sha256": "fa6909437b5c0a50dbb9f8dc82b557ab3fe947465bd49591473ebb2e10890ebb"
+    },
+    {
+      "id": "initial_sample_22_front",
+      "path": "research/local/graded/paco/images/ebay-psa10-2ade615838.jpg",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "sha256": "5e5d6964fa2ff7c21b0b40c9c660cc66bbdd8fc258677dbcadd4f5f09e5b7ecd"
+    },
+    {
+      "id": "initial_sample_23_front",
+      "path": "research/local/graded/paco/images/ebay-psa10-2b54594292.jpg",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "sha256": "5a9e86e456b4c0d5b5f7f0cd8502be319c33e0d38cce08d2d695d2246fce6c3e"
+    }
+  ]
+}

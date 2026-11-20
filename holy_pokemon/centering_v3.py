@@ -1,6 +1,6 @@
 """Centering v3: supported physical borders, perspective correction and ratios.
 
-Automatic measurement supports blue backs and observable yellow-border fronts.
+Automatic measurement supports blue backs and observable yellow/silver fronts.
 Unsupported full-art and asymmetric designs abstain rather than measuring artwork.
 No final-grade or upgrade-probability predictions. No network calls.
 """
@@ -20,7 +20,7 @@ except ImportError:  # pragma: no cover - pure-Python helpers still importable
     np = None  # type: ignore[assignment]
     HAS_CV2 = False
 
-VERSION = "centering-v3.2.0"
+VERSION = "centering-v3.3.0"
 TARGET_W, TARGET_H = 700, 980
 CARD_ASPECT = 2.5 / 3.5  # ~0.7143
 
@@ -352,20 +352,7 @@ def _transition_v3(lab: Any, grad_mag: Any, side: str, sample_pos: float, layout
     }
     threshold = thresholds.get(layout, 22.0)
     run = max(5, int(n * 0.009))
-    for pos in range(int(n * (0.015 if layout == "yellow_border" else 0.022)), int(n * (0.085 if layout == "yellow_border" else 0.20)) - run):
-        segment = distances[pos:pos + run]
-        if np.mean(segment > threshold) >= 0.78 and np.median(segment) >= threshold:
-            # Refine to nearest local gradient peak within +/- 3 px if strong
-            win_lo = max(low, pos - 3)
-            win_hi = min(n - 1, pos + 4)
-            local_g = g_line[win_lo:win_hi]
-            if local_g.size > 0 and float(np.max(local_g)) > 18.0:
-                return float(win_lo + int(np.argmax(local_g)))
-            return float(pos)
-    return None
-
-
-def _abstain(reason: str, **more: Any) -> dict[str, Any]:
+    for pos in range(int(n * (0.015 if layout == "yellow_border" else 0.022)), int(n * (0.085 if layout == "yellow_border" else…137 tokens truncated…ain(reason: str, **more: Any) -> dict[str, Any]:
     return {
         "version": VERSION,
         "status": "ABSTAIN",
@@ -407,6 +394,17 @@ def measure_bgr(
         from .centering_geometry import detect_outer
         geometry = detect_outer(bgr, side, layout)
         if geometry.get("status") == "ABSTAIN":
+            if side == "front":
+                from .centering_front import silver_frame
+                candidates, _ = _outer_card_candidates_v3(bgr, slab_aware=False)
+                silver = silver_frame(bgr, candidates)
+                if silver:
+                    widths = silver.pop("widths")
+                    ratios = compute_ratios(*(widths[n] for n in ("left","right","top","bottom")))
+                    return dict(version=VERSION,status="MEASURED_NEEDS_VALIDATION",side=side,
+                                layout="silver_border",ratios=ratios,border_px_rectified=widths,
+                                eligibility=centering_eligibility(ratios),psa_grade_prediction=None,
+                                validated_psa10_upgrade_probability=None,**silver)
             return _abstain(geometry["reason"], geometry_diagnostics=geometry)
         outer_quad = geometry["outer_quad"]
         detector_consensus = True

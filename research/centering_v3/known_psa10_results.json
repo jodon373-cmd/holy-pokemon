@@ -1,10 +1,10 @@
 {
-  "version": "centering-v3.2.0",
-  "detector_sha256": "e2df347d5fedaf4bfd343b938e6a6ea65b403061cc458780cb73f5e7e1eefcdb",
-  "photos": 6,
-  "specimens": 4,
-  "measured": 3,
-  "within_band": 3,
+  "version": "centering-v3.3.0",
+  "detector_sha256": "12bf0b3e62e494f7ddc4c229450ae628108bded48fcba6ca36224f940265396a",
+  "photos": 7,
+  "specimens": 5,
+  "measured": 4,
+  "within_band": 4,
   "abstentions": {
     "physical_card_border_not_observable": 2,
     "left_boundary_unobservable": 1
@@ -179,6 +179,45 @@
         [
           80.58235931396484,
           1117.0
+        ]
+      ]
+    },
+    {
+      "id": "charmander_front",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "VISIBLE_PSA_GEM_MT_10_HOLDER_LABEL_NOT_PROVIDER_VERIFIED",
+      "original_sha256": "ce2ea48d6981f19adf4bd9a72042bb708b91189167a715518a0585672bb7a73d",
+      "status": "MEASURED_NEEDS_VALIDATION",
+      "reason": null,
+      "ratios": {
+        "left_pct": 53.85,
+        "right_pct": 46.15,
+        "top_pct": 53.06,
+        "bottom_pct": 46.94,
+        "max_horizontal_pct": 53.85,
+        "max_vertical_pct": 53.06,
+        "worst_pct": 53.85,
+        "left_heavy": true,
+        "top_heavy": true
+      },
+      "within_side_screening_band": true,
+      "outer_quad": [
+        [
+          131.23373413085938,
+          133.51239013671875
+        ],
+        [
+          364.4038391113281,
+          132.54095458984375
+        ],
+        [
+          365.3920593261719,
+          455.875
+        ],
+        [
+          133.14157104492188,
+          457.7660217285156
         ]
       ]
     }

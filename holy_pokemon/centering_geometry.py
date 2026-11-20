@@ -20,6 +20,8 @@ def _abstain(reason, **kwargs):
 
 def _mask(image, kind):
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    if kind == 'silver_border':
+        return (((hsv[:,:,1] < 55) & (hsv[:,:,2] > 100)).astype(np.uint8) * 255)
     lo, hi = (85, 135) if kind == 'blue_back' else (15, 40)
     return (((hsv[:,:,0] >= lo) & (hsv[:,:,0] <= hi) &
              (hsv[:,:,1] >= 65) & (hsv[:,:,2] >= 35)).astype(np.uint8) * 255)
@@ -87,9 +89,9 @@ def _edge_support(image, q, kind):
     return scores
 
 def detect_outer(image, side, layout='auto'):
-    kinds = ['blue_back'] if side=='back' else ['yellow_border']
+    kinds = ['blue_back'] if side=='back' else ['yellow_border','silver_border']
     if layout != 'auto':
-        kinds=[layout] if layout in ('blue_back','yellow_border') else []
+        kinds=[layout] if layout in ('blue_back','yellow_border','silver_border') else []
     scale=min(1.,1400/max(image.shape[:2]))
     sample=cv2.resize(image,None,fx=scale,fy=scale) if scale<1 else image
     candidates=[]

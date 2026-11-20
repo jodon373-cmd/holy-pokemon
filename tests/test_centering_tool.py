@@ -50,6 +50,19 @@ class CenteringToolTests(unittest.TestCase):
         self.assertAlmostEqual(result['ratios']['left_pct'],50,delta=2)
         self.assertAlmostEqual(result['ratios']['top_pct'],50,delta=2)
 
+    def test_silver_front_automatic_without_corners(self):
+        image=np.full((1400,1000,3),40,np.uint8)
+        cv2.rectangle(image,(90,20),(910,1380),(160,160,160),8)
+        image[60:250,120:880]=210
+        image[330:1310,150:850]=(230,230,230)
+        image[365:1275,180:820]=(170,45,80)
+        result=measure_bgr(image,side='front')
+        self.assertEqual(result['status'],'MEASURED_NEEDS_VALIDATION',result)
+        self.assertEqual(result['layout'],'silver_border')
+        self.assertAlmostEqual(result['ratios']['left_pct'],50,delta=2)
+        self.assertAlmostEqual(result['ratios']['top_pct'],50,delta=2)
+        self.assertTrue(all(y>325 for x,y in result['outer_quad']))
+
     def test_side_detected_without_user_selection(self):
         result=inspect(dict(image=self.data(self.scene())))
         self.assertEqual(result['side'],'back')

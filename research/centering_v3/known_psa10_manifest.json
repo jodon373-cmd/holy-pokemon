@@ -47,7 +47,15 @@
       "observed_grade": 10,
       "label_provenance": "VISIBLE_PSA_GEM_MT_10_HOLDER_LABEL_NOT_PROVIDER_VERIFIED",
       "sha256": "8b314484042056000810a9353d7d8003152f2cbda6917e600a18a64525f542a4"
+    },
+    {
+      "id": "charmander_front",
+      "path": "research/local/graded/paco/images/ebay-psa10-2670e325f6.jpg",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "VISIBLE_PSA_GEM_MT_10_HOLDER_LABEL_NOT_PROVIDER_VERIFIED",
+      "sha256": "ce2ea48d6981f19adf4bd9a72042bb708b91189167a715518a0585672bb7a73d"
     }
   ],
-  "scope": "Four known-label PSA 10 specimens, six photos. Labels from owner records or visible holders, not provider verification. No blind accuracy claim. Original images remain external to Git."
+  "scope": "Five known-label PSA 10 specimens, seven photos. Labels from owner records or visible holders, not provider verification. No blind accuracy claim. Images stay external to Git."
 }

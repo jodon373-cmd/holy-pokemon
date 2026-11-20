@@ -352,7 +352,20 @@ def _transition_v3(lab: Any, grad_mag: Any, side: str, sample_pos: float, layout
     }
     threshold = thresholds.get(layout, 22.0)
     run = max(5, int(n * 0.009))
-    for pos in range(int(n * (0.015 if layout == "yellow_border" else 0.022)), int(n * (0.085 if layout == "yellow_border" else…137 tokens truncated…ain(reason: str, **more: Any) -> dict[str, Any]:
+    for pos in range(int(n * (0.015 if layout == "yellow_border" else 0.022)), int(n * (0.085 if layout == "yellow_border" else 0.20)) - run):
+        segment = distances[pos:pos + run]
+        if np.mean(segment > threshold) >= 0.78 and np.median(segment) >= threshold:
+            # Refine to nearest local gradient peak within +/- 3 px if strong
+            win_lo = max(low, pos - 3)
+            win_hi = min(n - 1, pos + 4)
+            local_g = g_line[win_lo:win_hi]
+            if local_g.size > 0 and float(np.max(local_g)) > 18.0:
+                return float(win_lo + int(np.argmax(local_g)))
+            return float(pos)
+    return None
+
+
+def _abstain(reason: str, **more: Any) -> dict[str, Any]:
     return {
         "version": VERSION,
         "status": "ABSTAIN",

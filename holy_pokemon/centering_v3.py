@@ -1,9 +1,8 @@
-"""Geometry-aware centering v3: dual-detector consensus, sub-pixel corners,
-slab-aware inner-card framing, and modern+vintage border support.
+"""Centering v3: supported physical borders, perspective correction and ratios.
 
-Never predicts a PSA/CGC/BGS final grade or upgrade probability—surface,
-edges, and corners cannot be verified from centering geometry alone.
-No network calls, tokens, or remote AI.
+Automatic measurement supports blue backs and observable yellow-border fronts.
+Unsupported full-art and asymmetric designs abstain rather than measuring artwork.
+No final-grade or upgrade-probability predictions. No network calls.
 """
 from __future__ import annotations
 
@@ -21,7 +20,7 @@ except ImportError:  # pragma: no cover - pure-Python helpers still importable
     np = None  # type: ignore[assignment]
     HAS_CV2 = False
 
-VERSION = "centering-v3.0.0"
+VERSION = "centering-v3.2.0"
 TARGET_W, TARGET_H = 700, 980
 CARD_ASPECT = 2.5 / 3.5  # ~0.7143
 
@@ -33,7 +32,7 @@ class CalibrationV3:
     height: int = TARGET_H
     min_consensus: float = 0.55
     max_relative_dispersion: float = 0.22
-    min_dimension: int = 440
+    min_dimension: int = 240
     min_laplacian_var: float = 35.0
     max_keystone_skew: float = 0.18
     slab_aware: bool = True
@@ -41,7 +40,8 @@ class CalibrationV3:
 
 def compute_ratios(left: float, right: float, top: float, bottom: float) -> dict[str, Any]:
     """Compute horizontal and vertical centering percentages from border widths."""
-    if min(left, right, top, bottom) <= 0:
+    import math
+    if not all(math.isfinite(v) for v in (left, right, top, bottom)) or min(left, right, top, bottom) <= 0:
         raise ValueError("Border widths must be positive")
     h_left = 100.0 * left / (left + right)
     v_top = 100.0 * top / (top + bottom)
@@ -339,8 +339,8 @@ def _transition_v3(lab: Any, grad_mag: Any, side: str, sample_pos: float, layout
             g_line = g_line[::-1]
         n = h
 
-    low = max(2, int(n * 0.015))
-    high = max(low + 2, int(n * 0.035))
+    low = max(2, int(n * (0.005 if layout == "yellow_border" else 0.015)))
+    high = max(low + 2, int(n * (0.015 if layout == "yellow_border" else 0.035)))
     reference = np.median(block[low:high], axis=0)
     distances = np.linalg.norm(block - reference[None, :], axis=1)
 
@@ -352,7 +352,7 @@ def _transition_v3(lab: Any, grad_mag: Any, side: str, sample_pos: float, layout
     }
     threshold = thresholds.get(layout, 22.0)
     run = max(5, int(n * 0.009))
-    for pos in range(int(n * 0.022), int(n * 0.20) - run):
+    for pos in range(int(n * (0.015 if layout == "yellow_border" else 0.022)), int(n * (0.085 if layout == "yellow_border" else 0.20)) - run):
         segment = distances[pos:pos + run]
         if np.mean(segment > threshold) >= 0.78 and np.median(segment) >= threshold:
             # Refine to nearest local gradient peak within +/- 3 px if strong
@@ -404,25 +404,18 @@ def measure_bgr(
     slab_detected = False
     detector_consensus = False
     if outer_quad is None:
-        candidates, slab_detected = _outer_card_candidates_v3(bgr, slab_aware=cfg.slab_aware)
-        if not candidates:
-            return _abstain("outer_card_not_found", outer_candidates=0)
-        if (
-            not slab_detected
-            and len(candidates) >= 2
-            and abs(candidates[0]["score"] - candidates[1]["score"]) < 0.12
-            and quad_bbox_iou(candidates[0]["points"], candidates[1]["points"]) < 0.70
-        ):
-            return _abstain("outer_card_ambiguous_slab_or_frame", outer_candidates=len(candidates))
-        outer_quad = candidates[0]["points"]
-        detector_consensus = bool(candidates[0].get("consensus", False))
+        from .centering_geometry import detect_outer
+        geometry = detect_outer(bgr, side, layout)
+        if geometry.get("status") == "ABSTAIN":
+            return _abstain(geometry["reason"], geometry_diagnostics=geometry)
+        outer_quad = geometry["outer_quad"]
+        detector_consensus = True
 
     try:
         quad = _order_quad(outer_quad)
         if np.any(quad[:, 0] < 0) or np.any(quad[:, 1] < 0) or np.any(quad[:, 0] >= w) or np.any(quad[:, 1] >= h):
             return _abstain("quad_outside_image")
-        if min(h, w) >= cfg.min_dimension:
-            quad = _refine_corners_subpixel(bgr, quad)
+        # Physical corners are intersections of straight edges, not rounded tips.
     except ValueError as e:
         return _abstain(str(e))
 
@@ -486,12 +479,16 @@ def measure_bgr(
             )
         widths[name] = median
 
+    if side == "front" and (widths["left"] > cfg.width*.075 or widths["right"] > cfg.width*.075 or widths["top"] > cfg.height*.075 or widths["bottom"] > cfg.height*.075):
+        return _abstain("asymmetric_or_unsupported_front_design", outer_quad=quad.tolist(), edge_diagnostics=diagnostics)
     ratios = compute_ratios(*(widths[n] for n in ("left", "right", "top", "bottom")))
     if any(v < cfg.width * 0.015 or v > cfg.width * 0.20 for k, v in widths.items() if k in ("left", "right")):
         return _abstain("horizontal_border_implausible", layout=kind, edge_diagnostics=diagnostics)
     if any(v < cfg.height * 0.015 or v > cfg.height * 0.20 for k, v in widths.items() if k in ("top", "bottom")):
         return _abstain("vertical_border_implausible", layout=kind, edge_diagnostics=diagnostics)
 
+    inner_rect = np.float32([[[widths["left"], widths["top"]], [cfg.width-1-widths["right"], widths["top"]], [cfg.width-1-widths["right"], cfg.height-1-widths["bottom"]], [widths["left"], cfg.height-1-widths["bottom"]]]])
+    inner_quad = cv2.perspectiveTransform(inner_rect, np.linalg.inv(transform))[0].tolist()
     elig = centering_eligibility(ratios if side == "front" else None, ratios if side == "back" else None)
     return {
         "version": VERSION,
@@ -505,6 +502,7 @@ def measure_bgr(
         "keystone_skew": skew,
         "laplacian_var": round(blur_var, 2),
         "outer_quad": quad.tolist(),
+        "inner_quad": inner_quad,
         "border_px_rectified": {k: round(v, 2) for k, v in widths.items()},
         "edge_diagnostics": diagnostics,
         "transitions": observations,

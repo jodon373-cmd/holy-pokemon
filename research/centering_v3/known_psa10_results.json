@@ -1,0 +1,186 @@
+{
+  "version": "centering-v3.2.0",
+  "detector_sha256": "e2df347d5fedaf4bfd343b938e6a6ea65b403061cc458780cb73f5e7e1eefcdb",
+  "photos": 6,
+  "specimens": 4,
+  "measured": 3,
+  "within_band": 3,
+  "abstentions": {
+    "physical_card_border_not_observable": 2,
+    "left_boundary_unobservable": 1
+  },
+  "evaluation_status": "KNOWN_LABEL_DIAGNOSTIC_NOT_BLIND_ACCURACY_ESTIMATE",
+  "grade_prediction": null,
+  "results": [
+    {
+      "id": "houndoom_front",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "OWNER_CONFIRMED",
+      "original_sha256": "5350f101b6204d1e4d104e9f5e36349a8a1c0b67581fd5b176ba3615c874ffbe",
+      "status": "ABSTAIN",
+      "reason": "physical_card_border_not_observable",
+      "ratios": null,
+      "within_side_screening_band": null,
+      "outer_quad": null
+    },
+    {
+      "id": "houndoom_back",
+      "side": "back",
+      "observed_grade": 10,
+      "label_provenance": "OWNER_CONFIRMED",
+      "original_sha256": "61ff608c7c10abeb035bcad9cb750a2e761db71613a59193aca39ace74eb2811",
+      "status": "MEASURED_NEEDS_VALIDATION",
+      "reason": null,
+      "ratios": {
+        "left_pct": 51.43,
+        "right_pct": 48.57,
+        "top_pct": 54.32,
+        "bottom_pct": 45.68,
+        "max_horizontal_pct": 51.43,
+        "max_vertical_pct": 54.32,
+        "worst_pct": 54.32,
+        "left_heavy": true,
+        "top_heavy": true
+      },
+      "within_side_screening_band": true,
+      "outer_quad": [
+        [
+          25.859594345092773,
+          21.0
+        ],
+        [
+          768.3238525390625,
+          21.0
+        ],
+        [
+          770.6919555664062,
+          1059.0
+        ],
+        [
+          28.098983764648438,
+          1059.0
+        ]
+      ]
+    },
+    {
+      "id": "tyranitar_front",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "OWNER_STATEMENT_AND_VISIBLE_HOLDER_41231132_NOT_API_VERIFIED",
+      "original_sha256": "12848ab1b1dcbef354965fe3d6e82f47accd22a122c539e9f3e78fec197b44af",
+      "status": "ABSTAIN",
+      "reason": "left_boundary_unobservable",
+      "ratios": null,
+      "within_side_screening_band": null,
+      "outer_quad": [
+        [
+          109.76713562011719,
+          461.3806457519531
+        ],
+        [
+          898.6303100585938,
+          463.7742919921875
+        ],
+        [
+          901.1370239257812,
+          1564.0380859375
+        ],
+        [
+          111.21428680419922,
+          1565.118896484375
+        ]
+      ]
+    },
+    {
+      "id": "tyranitar_back",
+      "side": "back",
+      "observed_grade": 10,
+      "label_provenance": "OWNER_STATEMENT_AND_VISIBLE_HOLDER_41231132_NOT_API_VERIFIED",
+      "original_sha256": "784cdf73221aee74c602c5c13fbe4153b5fb47b1ae98e7c8a2f7dc766c513854",
+      "status": "MEASURED_NEEDS_VALIDATION",
+      "reason": null,
+      "ratios": {
+        "left_pct": 49.28,
+        "right_pct": 50.72,
+        "top_pct": 46.43,
+        "bottom_pct": 53.57,
+        "max_horizontal_pct": 50.72,
+        "max_vertical_pct": 53.57,
+        "worst_pct": 53.57,
+        "left_heavy": false,
+        "top_heavy": false
+      },
+      "within_side_screening_band": true,
+      "outer_quad": [
+        [
+          112.7898941040039,
+          461.81646728515625
+        ],
+        [
+          892.9799194335938,
+          464.39111328125
+        ],
+        [
+          892.97998046875,
+          1562.1099853515625
+        ],
+        [
+          109.10746002197266,
+          1562.1099853515625
+        ]
+      ]
+    },
+    {
+      "id": "garchomp_front",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "VISIBLE_PSA_GEM_MT_10_HOLDER_LABEL_NOT_PROVIDER_VERIFIED",
+      "original_sha256": "d7b9c4a98028f8a4c9eabf9fd54d7182ee406291506a411cb9c1603e412bfdbe",
+      "status": "ABSTAIN",
+      "reason": "physical_card_border_not_observable",
+      "ratios": null,
+      "within_side_screening_band": null,
+      "outer_quad": null
+    },
+    {
+      "id": "jolteon_front",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "VISIBLE_PSA_GEM_MT_10_HOLDER_LABEL_NOT_PROVIDER_VERIFIED",
+      "original_sha256": "8b314484042056000810a9353d7d8003152f2cbda6917e600a18a64525f542a4",
+      "status": "MEASURED_NEEDS_VALIDATION",
+      "reason": null,
+      "ratios": {
+        "left_pct": 48.98,
+        "right_pct": 51.02,
+        "top_pct": 54.0,
+        "bottom_pct": 46.0,
+        "max_horizontal_pct": 51.02,
+        "max_vertical_pct": 54.0,
+        "worst_pct": 54.0,
+        "left_heavy": false,
+        "top_heavy": true
+      },
+      "within_side_screening_band": true,
+      "outer_quad": [
+        [
+          81.34407806396484,
+          331.39703369140625
+        ],
+        [
+          641.0000610351562,
+          333.9457092285156
+        ],
+        [
+          641.0,
+          1117.0
+        ],
+        [
+          80.58235931396484,
+          1117.0
+        ]
+      ]
+    }
+  ]
+}

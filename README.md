@@ -80,10 +80,55 @@ Centering v3 thresholds are **unverified experimental screening heuristics**,
 not certified current grader standards. Synthetic image tests do not establish
 accuracy on real cards. No independent real-photo benchmark or 645-listing v3
 replay has been run; v3 is not substituted for v2 in the saved-listing backtest.
-The 100-test local suite includes all three supplied v3 image tests and 11 review
+The initial 100-test local suite includes all three supplied v3 image tests and 11 review
 regressions, with no skips (Python 3.14 on this Mac; CI uses Python 3.12).
 
 Upgrade source: owner-provided `holy-pokemon-upgraded.zip`, SHA-256
 `d1081e905ebafd250891177b533dcb5d04d363490753df633d9cacdac4e37021`.
 Both supplied archives passed ZIP CRC integrity checks; original archives and
 Desktop source folders were preserved.
+
+
+## Run automatic centering
+
+Double-click `mac/Centering_Tool.command`, or run:
+
+```sh
+.venv/bin/python -m holy_pokemon.centering_tool
+```
+
+Choose or drop a photo. Side detection, physical card detection, perspective
+correction and printed-border measurement run automatically. The page overlays
+the detected boundaries and displays left/right and top/bottom ratios. Upload
+both sides of the same specimen for a combined centering screening check.
+There is no manual corner or border placement in this flow. Export saves JSON.
+
+For unattended local batches:
+
+```sh
+.venv/bin/python -m holy_pokemon.centering_tool --image /path/front.jpg --image /path/back.jpg --output outputs/automatic-centering.json
+```
+
+V3.2 uses supported physical border color plus straight-edge evidence to avoid
+slab/frame confusion. Rounded tips no longer pull physical corners inward.
+Front sampling uses the outer border color and rejects deeper artwork edges.
+Blue backs and observable yellow-border fronts are supported. Full-art, silver,
+e-reader and obscured borders can abstain; this is not universal design coverage.
+Original photos are never changed or uploaded.
+
+The reproducible known-PSA10 diagnostic is in `research/centering_v3/`:
+six photos of four specimens, **three automatically measured and within their
+side's screening band, three abstentions**. The measured photos are Houndoom
+back (51.43/48.57 L/R, 54.32/45.68 T/B), Tyranitar back (49.28/50.72,
+46.43/53.57), and Jolteon front (48.98/51.02, 54/46). Front/back counts must
+not be presented as three completely evaluated specimens. Labels come from
+owner records or visible holders, not a fresh certificate API check. These are
+known-label diagnostics, not blind accuracy or final-grade predictions.
+
+```sh
+.venv/bin/python -m holy_pokemon.centering_benchmark --manifest research/centering_v3/known_psa10_manifest.json --image-root /path/to/existing/holy-pokemon --output outputs/psa10-replay.json
+```
+
+The manifest pins immutable original hashes and references local photos without
+publishing them. Geometry helpers were reviewed and adapted from the owner's
+newer local `centering_v3.py`; that checkout was preserved unchanged.

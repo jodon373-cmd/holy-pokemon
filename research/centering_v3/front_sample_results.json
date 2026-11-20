@@ -1,0 +1,403 @@
+{
+  "version": "centering-v3.3.0",
+  "detector_sha256": "12bf0b3e62e494f7ddc4c229450ae628108bded48fcba6ca36224f940265396a",
+  "photos": 24,
+  "specimens": 24,
+  "measured": 3,
+  "within_band": 1,
+  "abstentions": {
+    "physical_card_border_not_observable": 19,
+    "multiple_supported_cards": 1,
+    "left_boundary_disagreement": 1
+  },
+  "evaluation_status": "KNOWN_LABEL_DIAGNOSTIC_NOT_BLIND_ACCURACY_ESTIMATE",
+  "grade_prediction": null,
+  "results": [
+    {
+      "id": "initial_sample_00_front",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "original_sha256": "dba58f4540e3fe456a9abfe9cddcb591fed70fc88524e5cd6fce09c3568b6caf",
+      "status": "ABSTAIN",
+      "reason": "physical_card_border_not_observable",
+      "ratios": null,
+      "within_side_screening_band": null,
+      "outer_quad": null
+    },
+    {
+      "id": "initial_sample_01_front",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "original_sha256": "74656bc1c66ed56f126cd08976920c98a183d2ee64417ae4c0014c35799c8f3f",
+      "status": "ABSTAIN",
+      "reason": "physical_card_border_not_observable",
+      "ratios": null,
+      "within_side_screening_band": null,
+      "outer_quad": null
+    },
+    {
+      "id": "initial_sample_02_front",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "original_sha256": "9952650ef6ad28d0ddc0e939db3c03664963d5156a16f6618e21ef64b51a2a33",
+      "status": "ABSTAIN",
+      "reason": "physical_card_border_not_observable",
+      "ratios": null,
+      "within_side_screening_band": null,
+      "outer_quad": null
+    },
+    {
+      "id": "initial_sample_03_front",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "original_sha256": "e0d0d9377af48ccbc4376095a6d1373c9ed2c09c18fa0fffa990b6b3635d0d85",
+      "status": "ABSTAIN",
+      "reason": "physical_card_border_not_observable",
+      "ratios": null,
+      "within_side_screening_band": null,
+      "outer_quad": null
+    },
+    {
+      "id": "initial_sample_04_front",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "original_sha256": "7d6c12eb7c5ea4009121bb2bae9122f9bb5f5304d035115d2f5a9669ee01eae4",
+      "status": "ABSTAIN",
+      "reason": "physical_card_border_not_observable",
+      "ratios": null,
+      "within_side_screening_band": null,
+      "outer_quad": null
+    },
+    {
+      "id": "initial_sample_05_front",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "original_sha256": "81d3391b2c19c37671a5297cb2087db63db22643f74e100c229ddd19c538af2a",
+      "status": "ABSTAIN",
+      "reason": "physical_card_border_not_observable",
+      "ratios": null,
+      "within_side_screening_band": null,
+      "outer_quad": null
+    },
+    {
+      "id": "initial_sample_06_front",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "original_sha256": "d9b36aee0c3428a0cab7f9cccecc819eeec4761afafea5e60f8f1ead20ad4003",
+      "status": "MEASURED_NEEDS_VALIDATION",
+      "reason": null,
+      "ratios": {
+        "left_pct": 57.89,
+        "right_pct": 42.11,
+        "top_pct": 43.9,
+        "bottom_pct": 56.1,
+        "max_horizontal_pct": 57.89,
+        "max_vertical_pct": 56.1,
+        "worst_pct": 57.89,
+        "left_heavy": true,
+        "top_heavy": false
+      },
+      "within_side_screening_band": false,
+      "outer_quad": [
+        [
+          118.45269775390625,
+          173.45407104492188
+        ],
+        [
+          267.33447265625,
+          176.00347900390625
+        ],
+        [
+          263.1177673339844,
+          378.9655456542969
+        ],
+        [
+          119.10536193847656,
+          378.8493957519531
+        ]
+      ]
+    },
+    {
+      "id": "initial_sample_07_front",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "original_sha256": "96215c502a916dad8ab59c673ecdf279168578889301728eebc74dbf1deea921",
+      "status": "MEASURED_NEEDS_VALIDATION",
+      "reason": null,
+      "ratios": {
+        "left_pct": 56.25,
+        "right_pct": 43.75,
+        "top_pct": 65.71,
+        "bottom_pct": 34.29,
+        "max_horizontal_pct": 56.25,
+        "max_vertical_pct": 65.71,
+        "worst_pct": 65.71,
+        "left_heavy": true,
+        "top_heavy": true
+      },
+      "within_side_screening_band": false,
+      "outer_quad": [
+        [
+          135.0,
+          138.0
+        ],
+        [
+          358.0,
+          134.0
+        ],
+        [
+          364.0,
+          453.0
+        ],
+        [
+          137.0,
+          456.0
+        ]
+      ]
+    },
+    {
+      "id": "initial_sample_08_front",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "original_sha256": "4d1a974faf0387e2d2cfcfe69e18574cf452b6ec96c08bb5af0d60bc1bb50437",
+      "status": "ABSTAIN",
+      "reason": "physical_card_border_not_observable",
+      "ratios": null,
+      "within_side_screening_band": null,
+      "outer_quad": null
+    },
+    {
+      "id": "initial_sample_09_front",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "original_sha256": "d33bf91e7dae2f00c091d7d1b74d296c1730760d30a10f20400eae6022de7a1d",
+      "status": "ABSTAIN",
+      "reason": "multiple_supported_cards",
+      "ratios": null,
+      "within_side_screening_band": null,
+      "outer_quad": null
+    },
+    {
+      "id": "initial_sample_10_front",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "original_sha256": "2f5b0452811d68e168825364cdab1de33cd98e7494710cb6a1c7d8afc68feb08",
+      "status": "ABSTAIN",
+      "reason": "physical_card_border_not_observable",
+      "ratios": null,
+      "within_side_screening_band": null,
+      "outer_quad": null
+    },
+    {
+      "id": "initial_sample_11_front",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "original_sha256": "6ec8e84eaef76d963c80cdc61b34bd3e1ca3c85b6ff0ae554d504e17a46e525c",
+      "status": "ABSTAIN",
+      "reason": "physical_card_border_not_observable",
+      "ratios": null,
+      "within_side_screening_band": null,
+      "outer_quad": null
+    },
+    {
+      "id": "initial_sample_12_front",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "original_sha256": "8b72f4a3e8f9b1acee73bc43818298e3543aabe970b45d00d41d136a77fb714c",
+      "status": "ABSTAIN",
+      "reason": "physical_card_border_not_observable",
+      "ratios": null,
+      "within_side_screening_band": null,
+      "outer_quad": null
+    },
+    {
+      "id": "initial_sample_13_front",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "original_sha256": "342f188e4e21e2ca90b88ad4a321bd08b50ea8b1e5b1ecccd6a2138ac90e1137",
+      "status": "ABSTAIN",
+      "reason": "physical_card_border_not_observable",
+      "ratios": null,
+      "within_side_screening_band": null,
+      "outer_quad": null
+    },
+    {
+      "id": "initial_sample_14_front",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "original_sha256": "834e9811fd30093e367b082b48c912f32934fdd88bc259537e7e50c988acb96e",
+      "status": "ABSTAIN",
+      "reason": "physical_card_border_not_observable",
+      "ratios": null,
+      "within_side_screening_band": null,
+      "outer_quad": null
+    },
+    {
+      "id": "initial_sample_15_front",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "original_sha256": "7e3569373465056d0a959fb7104ff0d16cbb9561db8dd6fa1b2d00e972c8de1a",
+      "status": "ABSTAIN",
+      "reason": "physical_card_border_not_observable",
+      "ratios": null,
+      "within_side_screening_band": null,
+      "outer_quad": null
+    },
+    {
+      "id": "initial_sample_16_front",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "original_sha256": "4034a2a9980dfd19207a790edd17068422293d616c2493140f8542979c37eeef",
+      "status": "ABSTAIN",
+      "reason": "physical_card_border_not_observable",
+      "ratios": null,
+      "within_side_screening_band": null,
+      "outer_quad": null
+    },
+    {
+      "id": "initial_sample_17_front",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "original_sha256": "a7df9876690dec1852e58358577455774b134cb6c02a49967b7e7a8a93f487d2",
+      "status": "ABSTAIN",
+      "reason": "physical_card_border_not_observable",
+      "ratios": null,
+      "within_side_screening_band": null,
+      "outer_quad": null
+    },
+    {
+      "id": "initial_sample_18_front",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "original_sha256": "a5785b27a8e674d9ca82511756de76afce550ff3413b2bbb618f72560e98c1d6",
+      "status": "ABSTAIN",
+      "reason": "physical_card_border_not_observable",
+      "ratios": null,
+      "within_side_screening_band": null,
+      "outer_quad": null
+    },
+    {
+      "id": "initial_sample_19_front",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "original_sha256": "bd0d56bcc51aa33db5c67c6c0b30c09f4a3f45648afd7a801966e606390e17ec",
+      "status": "ABSTAIN",
+      "reason": "physical_card_border_not_observable",
+      "ratios": null,
+      "within_side_screening_band": null,
+      "outer_quad": null
+    },
+    {
+      "id": "initial_sample_20_front",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "original_sha256": "ce2ea48d6981f19adf4bd9a72042bb708b91189167a715518a0585672bb7a73d",
+      "status": "MEASURED_NEEDS_VALIDATION",
+      "reason": null,
+      "ratios": {
+        "left_pct": 53.85,
+        "right_pct": 46.15,
+        "top_pct": 53.06,
+        "bottom_pct": 46.94,
+        "max_horizontal_pct": 53.85,
+        "max_vertical_pct": 53.06,
+        "worst_pct": 53.85,
+        "left_heavy": true,
+        "top_heavy": true
+      },
+      "within_side_screening_band": true,
+      "outer_quad": [
+        [
+          131.23373413085938,
+          133.51239013671875
+        ],
+        [
+          364.4038391113281,
+          132.54095458984375
+        ],
+        [
+          365.3920593261719,
+          455.875
+        ],
+        [
+          133.14157104492188,
+          457.7660217285156
+        ]
+      ]
+    },
+    {
+      "id": "initial_sample_21_front",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "original_sha256": "fa6909437b5c0a50dbb9f8dc82b557ab3fe947465bd49591473ebb2e10890ebb",
+      "status": "ABSTAIN",
+      "reason": "physical_card_border_not_observable",
+      "ratios": null,
+      "within_side_screening_band": null,
+      "outer_quad": null
+    },
+    {
+      "id": "initial_sample_22_front",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "original_sha256": "5e5d6964fa2ff7c21b0b40c9c660cc66bbdd8fc258677dbcadd4f5f09e5b7ecd",
+      "status": "ABSTAIN",
+      "reason": "left_boundary_disagreement",
+      "ratios": null,
+      "within_side_screening_band": null,
+      "outer_quad": [
+        [
+          142.41299438476562,
+          144.1407928466797
+        ],
+        [
+          356.87860107421875,
+          141.37503051757812
+        ],
+        [
+          357.12078857421875,
+          450.2420654296875
+        ],
+        [
+          142.02328491210938,
+          449.7955627441406
+        ]
+      ]
+    },
+    {
+      "id": "initial_sample_23_front",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "PACO_DATASET_REPORTED_PSA_10_NOT_INDEPENDENTLY_VERIFIED",
+      "original_sha256": "5a9e86e456b4c0d5b5f7f0cd8502be319c33e0d38cce08d2d695d2246fce6c3e",
+      "status": "ABSTAIN",
+      "reason": "physical_card_border_not_observable",
+      "ratios": null,
+      "within_side_screening_band": null,
+      "outer_quad": null
+    }
+  ]
+}

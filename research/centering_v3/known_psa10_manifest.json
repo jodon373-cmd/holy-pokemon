@@ -1,0 +1,61 @@
+{
+  "records": [
+    {
+      "id": "houndoom_front",
+      "path": "uploads/5350f101b6204d1e4d104e9f5e36349a8a1c0b67581fd5b176ba3615c874ffbe.png",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "OWNER_CONFIRMED",
+      "sha256": "5350f101b6204d1e4d104e9f5e36349a8a1c0b67581fd5b176ba3615c874ffbe"
+    },
+    {
+      "id": "houndoom_back",
+      "path": "uploads/61ff608c7c10abeb035bcad9cb750a2e761db71613a59193aca39ace74eb2811.png",
+      "side": "back",
+      "observed_grade": 10,
+      "label_provenance": "OWNER_CONFIRMED",
+      "sha256": "61ff608c7c10abeb035bcad9cb750a2e761db71613a59193aca39ace74eb2811"
+    },
+    {
+      "id": "tyranitar_front",
+      "path": "uploads/12848ab1b1dcbef354965fe3d6e82f47accd22a122c539e9f3e78fec197b44af.png",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "OWNER_STATEMENT_AND_VISIBLE_HOLDER_41231132_NOT_API_VERIFIED",
+      "sha256": "12848ab1b1dcbef354965fe3d6e82f47accd22a122c539e9f3e78fec197b44af"
+    },
+    {
+      "id": "tyranitar_back",
+      "path": "uploads/784cdf73221aee74c602c5c13fbe4153b5fb47b1ae98e7c8a2f7dc766c513854.png",
+      "side": "back",
+      "observed_grade": 10,
+      "label_provenance": "OWNER_STATEMENT_AND_VISIBLE_HOLDER_41231132_NOT_API_VERIFIED",
+      "sha256": "784cdf73221aee74c602c5c13fbe4153b5fb47b1ae98e7c8a2f7dc766c513854"
+    },
+    {
+      "id": "garchomp_front",
+      "path": "research/local/graded/paco/images/pwcc-psa10p0-5043a1a267.jpg",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "VISIBLE_PSA_GEM_MT_10_HOLDER_LABEL_NOT_PROVIDER_VERIFIED",
+      "sha256": "d7b9c4a98028f8a4c9eabf9fd54d7182ee406291506a411cb9c1603e412bfdbe"
+    },
+    {
+      "id": "jolteon_front",
+      "path": "research/local/graded/paco/images/pwcc-psa10p0-a7edbcde92.jpg",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "VISIBLE_PSA_GEM_MT_10_HOLDER_LABEL_NOT_PROVIDER_VERIFIED",
+      "sha256": "8b314484042056000810a9353d7d8003152f2cbda6917e600a18a64525f542a4"
+    },
+    {
+      "id": "charmander_front",
+      "path": "research/local/graded/paco/images/ebay-psa10-2670e325f6.jpg",
+      "side": "front",
+      "observed_grade": 10,
+      "label_provenance": "VISIBLE_PSA_GEM_MT_10_HOLDER_LABEL_NOT_PROVIDER_VERIFIED",
+      "sha256": "ce2ea48d6981f19adf4bd9a72042bb708b91189167a715518a0585672bb7a73d"
+    }
+  ],
+  "scope": "Five known-label PSA 10 specimens, seven photos. Labels from owner records or visible holders, not provider verification. No blind accuracy claim. Images stay external to Git."
+}

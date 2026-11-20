@@ -45,3 +45,106 @@ The original files stay **locally stored and immutable**; they are deliberately 
 **PSA Vault is a required full workflow**: vaulted vs eligible discovery, collection and custody, tax/fee/withdrawal analysis, PSA eBay consignment and Partner Offers, withdraw-to-regrade, owner-initiated transfer tracking and payout reconciliation. See [docs/PSA_VAULT_END_TO_END.md](docs/PSA_VAULT_END_TO_END.md). It is not a promised undocumented API.
 
 **Codex start:** read [AGENTS.md](AGENTS.md), then execute [docs/CODEX_MASTER_BUILD.md](docs/CODEX_MASTER_BUILD.md). Engineering source references and prior tests are quarantined under [reference/legacy_scanner](reference/legacy_scanner/README.md). Complete data/vision design: [docs/PROJECT_SCOPE.md](docs/PROJECT_SCOPE.md), [docs/AI_GRADER_TRAINING.md](docs/AI_GRADER_TRAINING.md), [docs/MARKET_DATA_SOURCES.md](docs/MARKET_DATA_SOURCES.md). For primary 18-source records and the additional overlapping 28-video transcript corpus, see [research/FULL_SOURCE_TRANSPORT.md](research/FULL_SOURCE_TRANSPORT.md) and [research/DATA_TRANSPORT.md](research/DATA_TRANSPORT.md).
+
+## Reviewed centering v3 and offline search upgrade
+
+The additive `centering_v3`, `title_parser`, `comp_index`, `roi_scorer`,
+`query_planner`, and `scan_pipeline` modules support experimental image geometry
+and offline research ranking. eBay CLI imports now have the required network,
+SQLite, and CSV helpers. Existing v2 and dashboard flows remain available.
+
+```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install 'Pillow>=10,<13' 'numpy>=1.26,<3' 'opencv-python-headless>=4.8,<5'
+.venv/bin/python -m unittest discover -s tests -v
+.venv/bin/python -m holy_pokemon.scan_pipeline --input listings.json --output-json outputs/leads.json --output-csv outputs/leads.csv
+```
+
+Input is a JSON list (or an object with `listings`), with `title`, `card`,
+`number`, `set_name`, `edition`, `asking_price`, and `shipping` fields. Explicit
+zero shipping means free shipping; missing shipping remains unknown. Currency
+defaults to USD for manual files; explicit other currencies require conversion
+outside this scanner. Titles must identify finish for scoring. Incomplete leads
+remain visible with an explanatory status. The CLI reads local input only; it
+neither searches live nor automatically measures photos. A previously computed
+`centering` result may be supplied per listing.
+
+Comp summaries preserve source-reported status and reject ambiguous variant
+pools. Default fee/tax assumptions are illustrative, configurable through the
+Python `FeeSchedule`, and reported alongside results. Downside uses target-grader
+9 comps, never the destroyed original holder; it is a scenario rather than a
+worst-case bound. Break-even rate is sensitivity, not an upgrade probability.
+All leads have `trade_approved: false`.
+
+Centering v3 thresholds are **unverified experimental screening heuristics**,
+not certified current grader standards. Synthetic image tests do not establish
+accuracy on real cards. No independent real-photo benchmark or 645-listing v3
+replay has been run; v3 is not substituted for v2 in the saved-listing backtest.
+The initial 100-test local suite includes all three supplied v3 image tests and 11 review
+regressions, with no skips (Python 3.14 on this Mac; CI uses Python 3.12).
+
+Upgrade source: owner-provided `holy-pokemon-upgraded.zip`, SHA-256
+`d1081e905ebafd250891177b533dcb5d04d363490753df633d9cacdac4e37021`.
+Both supplied archives passed ZIP CRC integrity checks; original archives and
+Desktop source folders were preserved.
+
+
+## Run automatic centering
+
+Double-click `mac/Centering_Tool.command`, or run:
+
+```sh
+.venv/bin/python -m holy_pokemon.centering_tool
+```
+
+Choose or drop a photo. Side detection, physical card detection, perspective
+correction and printed-border measurement run automatically. The page overlays
+the detected boundaries and displays left/right and top/bottom ratios. Upload
+both sides of the same specimen for a combined centering screening check.
+There is no manual corner or border placement in this flow. Export saves JSON.
+
+For unattended local batches:
+
+```sh
+.venv/bin/python -m holy_pokemon.centering_tool --image /path/front.jpg --image /path/back.jpg --output outputs/automatic-centering.json
+```
+
+V3.3 uses supported physical border color plus straight-edge evidence to avoid
+slab/frame confusion. Rounded tips no longer pull physical corners inward.
+Front sampling uses the outer border color and rejects deeper artwork edges.
+Blue backs and observable yellow/silver-border fronts are supported. Borderless full-art,
+e-reader and obscured borders can abstain; this is not universal design coverage.
+Original photos are never changed or uploaded.
+
+The reproducible known-PSA10 diagnostic is in `research/centering_v3/`:
+seven photos of five specimens, **four automatically measured and within their
+side's screening band, three abstentions**. The measured photos are Houndoom
+back (51.43/48.57 L/R, 54.32/45.68 T/B), Tyranitar back (49.28/50.72,
+46.43/53.57), Jolteon front (48.98/51.02, 54/46), and Charmander silver-border front
+(53.85/46.15, 53.06/46.94). Front/back counts must
+not be presented as four completely evaluated specimens. Labels come from
+owner records or visible holders, not a fresh certificate API check. These are
+known-label diagnostics, not blind accuracy or final-grade predictions.
+
+```sh
+.venv/bin/python -m holy_pokemon.centering_benchmark --manifest research/centering_v3/known_psa10_manifest.json --image-root /path/to/existing/holy-pokemon --output outputs/psa10-replay.json
+```
+
+The manifest pins immutable original hashes and references local photos without
+publishing them. Geometry helpers were reviewed and adapted from the owner's
+newer local `centering_v3.py`; that checkout was preserved unchanged.
+
+
+V3.3 adds automatic silver-frame front detection. Candidate rectangles are search
+windows; four neutral frame strips establish the physical and printed edges.
+Six or more spatial segments corroborate each silver edge. Multi-card windows
+are rejected. This avoids the earlier 70/30 false measurement on the saved
+Charmander front; it now measures 53.85/46.15 L/R and 53.06/46.94 T/B.
+
+The complete initial 24-photo front sample is also committed as manifests and
+results, including failures: 3 measured, 1 within the strict screening band,
+2 outside and 21 abstentions. Several pictures contain multiple slabs or have
+thin borders with very few native pixels. **Automatic front support exists but
+coverage is limited; the tool is not validated for arbitrary front designs.**
+Do not infer grading accuracy from passing software tests or tune the screening
+thresholds to make known grades pass. Local suite: 111 tests pass with no skips.

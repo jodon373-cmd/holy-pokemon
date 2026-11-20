@@ -45,3 +45,45 @@ The original files stay **locally stored and immutable**; they are deliberately 
 **PSA Vault is a required full workflow**: vaulted vs eligible discovery, collection and custody, tax/fee/withdrawal analysis, PSA eBay consignment and Partner Offers, withdraw-to-regrade, owner-initiated transfer tracking and payout reconciliation. See [docs/PSA_VAULT_END_TO_END.md](docs/PSA_VAULT_END_TO_END.md). It is not a promised undocumented API.
 
 **Codex start:** read [AGENTS.md](AGENTS.md), then execute [docs/CODEX_MASTER_BUILD.md](docs/CODEX_MASTER_BUILD.md). Engineering source references and prior tests are quarantined under [reference/legacy_scanner](reference/legacy_scanner/README.md). Complete data/vision design: [docs/PROJECT_SCOPE.md](docs/PROJECT_SCOPE.md), [docs/AI_GRADER_TRAINING.md](docs/AI_GRADER_TRAINING.md), [docs/MARKET_DATA_SOURCES.md](docs/MARKET_DATA_SOURCES.md). For primary 18-source records and the additional overlapping 28-video transcript corpus, see [research/FULL_SOURCE_TRANSPORT.md](research/FULL_SOURCE_TRANSPORT.md) and [research/DATA_TRANSPORT.md](research/DATA_TRANSPORT.md).
+
+## Reviewed centering v3 and offline search upgrade
+
+The additive `centering_v3`, `title_parser`, `comp_index`, `roi_scorer`,
+`query_planner`, and `scan_pipeline` modules support experimental image geometry
+and offline research ranking. eBay CLI imports now have the required network,
+SQLite, and CSV helpers. Existing v2 and dashboard flows remain available.
+
+```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install 'Pillow>=10,<13' 'numpy>=1.26,<3' 'opencv-python-headless>=4.8,<5'
+.venv/bin/python -m unittest discover -s tests -v
+.venv/bin/python -m holy_pokemon.scan_pipeline --input listings.json --output-json outputs/leads.json --output-csv outputs/leads.csv
+```
+
+Input is a JSON list (or an object with `listings`), with `title`, `card`,
+`number`, `set_name`, `edition`, `asking_price`, and `shipping` fields. Explicit
+zero shipping means free shipping; missing shipping remains unknown. Currency
+defaults to USD for manual files; explicit other currencies require conversion
+outside this scanner. Titles must identify finish for scoring. Incomplete leads
+remain visible with an explanatory status. The CLI reads local input only; it
+neither searches live nor automatically measures photos. A previously computed
+`centering` result may be supplied per listing.
+
+Comp summaries preserve source-reported status and reject ambiguous variant
+pools. Default fee/tax assumptions are illustrative, configurable through the
+Python `FeeSchedule`, and reported alongside results. Downside uses target-grader
+9 comps, never the destroyed original holder; it is a scenario rather than a
+worst-case bound. Break-even rate is sensitivity, not an upgrade probability.
+All leads have `trade_approved: false`.
+
+Centering v3 thresholds are **unverified experimental screening heuristics**,
+not certified current grader standards. Synthetic image tests do not establish
+accuracy on real cards. No independent real-photo benchmark or 645-listing v3
+replay has been run; v3 is not substituted for v2 in the saved-listing backtest.
+The 100-test local suite includes all three supplied v3 image tests and 11 review
+regressions, with no skips (Python 3.14 on this Mac; CI uses Python 3.12).
+
+Upgrade source: owner-provided `holy-pokemon-upgraded.zip`, SHA-256
+`d1081e905ebafd250891177b533dcb5d04d363490753df633d9cacdac4e37021`.
+Both supplied archives passed ZIP CRC integrity checks; original archives and
+Desktop source folders were preserved.

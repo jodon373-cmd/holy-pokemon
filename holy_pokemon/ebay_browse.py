@@ -461,10 +461,11 @@ class EbayBrowse:
         """Local checks also apply to cache hits. Descriptor IDs are not an undocumented wire filter."""
         from .title_parser import parse_title
         from .compsniper import money
+        from .roi_scorer import listing_ask
         kept, rejected = [], 0
         for source in payload['rows']:
             row = dict(source)
-            amount = money(row.get('asking_price') or row.get('current_bid'))
+            amount = money(listing_ask(row))
             if max_price is not None and (row.get('currency')!='USD' or amount is None or amount > Decimal(str(max_price))):
                 rejected += 1
                 continue

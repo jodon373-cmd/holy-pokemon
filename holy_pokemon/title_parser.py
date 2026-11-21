@@ -39,7 +39,26 @@ _LANGUAGES = (
     ("French", re.compile(r"\b(french|francais|français)\b", re.IGNORECASE)),
     ("Spanish", re.compile(r"\b(spanish|espanol|español)\b", re.IGNORECASE)),
     ("Italian", re.compile(r"\b(italian|italiano)\b", re.IGNORECASE)),
+    ("Dutch", re.compile(r"\b(dutch|nederlands)\b", re.IGNORECASE)),
+    ("Portuguese", re.compile(r"\b(portuguese|portugu[eê]s)\b", re.IGNORECASE)),
+    ("Indonesian", re.compile(r"\b(indonesian|bahasa indonesia)\b", re.IGNORECASE)),
+    ("Thai", re.compile(r"\bthai\b", re.IGNORECASE)),
+    ("Russian", re.compile(r"\b(russian|русский)\b", re.IGNORECASE)),
 )
+
+
+CARD_NAME_TYPOS = {
+    'Charizard': 'Charzard',
+    'Blastoise': 'Blastiose',
+    'Gyarados': 'Gyrados',
+    'Pikachu': 'Pickachu',
+}
+
+
+def repair_known_card_typos(title: str) -> str:
+    for card, alias in CARD_NAME_TYPOS.items():
+        title = re.sub(r'\b' + re.escape(alias) + r'\b', card, title, flags=re.IGNORECASE)
+    return title
 
 
 @dataclass(frozen=True)

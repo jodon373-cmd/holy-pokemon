@@ -100,3 +100,32 @@ Explicitly opted-in provider discovery uses `--discover --live --query-limit 12 
 Open `/search-engine` on the local dashboard. **Load saved bot leads** reads the source database without changing it or refreshing marketplace availability. Set `HOLY_SOURCE_DATABASE` to an existing bot SQLite file when running the app against a separate `HOLY_DATABASE`. All decisions remain research-only; max-offer scenarios depend on the displayed cost assumptions and available exact comps.
 
 Last integration validation: 204 tests passed, full Ruff passed, offline JSON/CSV exports verified, and the browser loaded 98 saved leads. The existing running Mac bot was preserved on port 8876; the isolated review instance uses port 8877.
+
+## Replay the complete saved feed
+
+Use a saved bot database as read-only input. The report counts every row it processes, then exports the requested number of ranked leads.
+
+```sh
+.venv/bin/python -m holy_pokemon.scan_pipeline \
+  --saved-db /path/to/holy.sqlite3 --export-limit 100 \
+  --output-json outputs/ranked.json --output-csv outputs/ranked.csv
+```
+
+Add `--saved-limit` to preview a smaller batch. A saved listing's last observation is shown in its evidence. Open the listing to confirm current availability and price.
+
+For a broader discovery plan, repeat `--universe catalog.csv` to append exact identities to the default seeds. Use the columns `set,card,number,edition,language`. Advance `--exploration-offset` across runs to expose more of the lower-priority catalog. `--pages-per-query 2` visits the first page of each distinct query before retrieving second pages. Existing daily and run request caps still apply.
+
+Use repeatable `--comp-csv` inputs for authorized transaction exports, alongside the default reports. Use `set,card,number,edition,finish,language,grader,grade,sale_date,transaction_price_usd,source_url,currency,sale_status,best_offer_status`. Supply actual paid prices in USD. Unresolved offers and non-sale statuses are excluded when declared. The same eBay item cannot count twice across URL aliases. If reports disagree on that item's price, date, grade or identity, it stays out of the comp pool.
+
+**Priority review** requires a positive increment over selling the original slab, a price within the ceiling and at least three exact reported sales for each of the original and target grades. Routes are evaluated independently before inspection. Review the source evidence and item photos before making a purchase decision. The modeled break-even and beat-original rates apply to a specific downgrade scenario and do not estimate the odds of an upgrade.
+
+## Reference projects and provider boundaries
+
+- [casecomp](https://github.com/Pyronewbic/casecomp) documents staged marketplace search and separate front/back inspection. Holy Pokémon keeps the existing local geometry pass, displays condition vetoes, and gives unresolved photos a review state.
+- [Catchem-data](https://github.com/Tbaker-maker/Catchem-data) documents quota-conscious Browse pulls. The official [Browse search contract](https://developer.ebay.com/develop/api/buy/browse_api/item/search) governs request limits, pagination and the active-listing window here. [PokeMonitor](https://github.com/Anthz/PokeMonitor) documents SQLite history. The existing local cache now supports full feed replay.
+- [sports-card-agent](https://github.com/rjexile/sports-card-agent) documents fee-adjusted grading comparisons. [Pokecracker](https://github.com/Pumbata/Pokecracker) highlights the importance of raw condition and net recovery. This implementation models specific lower slab grades separately and leaves unknown raw recovery unresolved.
+- [pokebay](https://github.com/adamistheanswer/pokebay) documents combined-shipping optimization. The scorer only uses shipping attributable to the observed listing. It has no evidence of seller consolidation until that amount is supplied.
+- [TAG sales scraper](https://github.com/Veeeetzzzz/tag-sales-scraper) and [GoupixDex](https://github.com/Leoglme/GoupixDex) illustrate candidate identity suggestions. The known-typo path surfaces a review proposal tied to a unique catalog variant and keeps it out of financial scoring until confirmed.
+- CompSniper is the existing optional online comp adapter. [TCG API](https://tcgapi.dev/use-cases/ebay-sold-prices/) documents transaction rows separately from medians. [PokeTrace](https://poketrace.com/faq) separates grading and venue coverage by access tier. Use normalized authorized transaction exports through the CSV input. Neither service currently has an authenticated adapter in this bot.
+
+These changes use repository-native code. Source descriptions and selected READMEs informed the design. Provider summaries, population ratios, proxy rotation and external purchasing automation were not incorporated into the financial funnel.

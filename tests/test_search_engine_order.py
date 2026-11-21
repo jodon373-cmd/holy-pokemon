@@ -124,6 +124,16 @@ class FredyEconomics(unittest.TestCase):
         self.assertEqual(overpriced['financial_gate'],'OVER_MAX_OFFER')
         self.assertEqual(overpriced['opportunity_score'],0)
 
+    def test_auction_bid_and_buyer_premium_are_costed(self):
+        row = listing(asking_price=None, current_bid={'value': '100', 'currency': 'USD'},
+                      buying_options=['AUCTION'], buyer_premium_pct='10')
+        scored = self.score(row)
+        self.assertEqual(scored['landed_cost_usd'], '110.00')
+        self.assertEqual(scored['max_bid_ceiling'], '118.18')
+        self.assertEqual(scored['observed_price_basis'], 'AUCTION_BID')
+        self.assertEqual(self.score(dict(row, current_bid={'value': '100', 'currency': 'GBP'}))
+                         ['status'], 'SKIPPED_NO_ASKING_PRICE')
+
     def test_every_failed_attempt_is_charged(self):
         r=self.score(listing(route_steps=[dict(grader='CGC',grading_fee='20'),dict(grader='CGC',grading_fee='30')]))
         self.assertEqual(r['total_investment_usd'],'150.00')
@@ -136,7 +146,9 @@ class FredyEconomics(unittest.TestCase):
         self.assertEqual(r['max_offer_usd'],'130.00')
         self.assertIn('PRISTINE_OUTLIER_ONLY',r['warnings'])
         self.assertEqual(r['pristine_score_bonus'],0)
-        self.assertIsNone(r['downside_net_profit_usd'])
+        self.assertEqual(r['downside_net_profit_usd'], '-66.00')
+        self.assertEqual(r['break_even_upgrade_rate'], '0.0780')
+        self.assertEqual(r['failure_scenarios'][0]['minimum_upgrade_rate_to_beat_original'], '0.1726')
         self.assertEqual(r['failure_scenarios'][0]['grade'],'8')
 
     def test_bgs_missing_subgrades_reserve_and_channels(self):
@@ -190,6 +202,83 @@ class PipelineContracts(unittest.TestCase):
         second=listing(proposed_target_grader='PSA',proposed_target_grade='10')
         r=scan_listings([first,second],comp_index=index(),fees=FEES)['ranked_leads'][0]
         self.assertEqual({x['target_route'] for x in r['route_comparison']},{'CGC_GEM_MINT_10','PSA_10'})
+
+    def test_best_route_wins_regardless_of_discovery_order_and_veto_drops_priority(self):
+        cgc = listing(proposed_target_grader='CGC', proposed_target_grade='GEM_MINT_10')
+        psa = listing(proposed_target_grader='PSA', proposed_target_grade='10')
+        for rows in ([cgc, psa], [psa, cgc]):
+            lead = scan_listings(rows, comp_index=index(), fees=FEES)['ranked_leads'][0]
+            self.assertEqual(lead['target_route'], 'CGC_GEM_MINT_10')
+            self.assertEqual(lead['review_queue'], 'PRIORITY_REVIEW')
+        damaged = dict(cgc, condition_review={'visible_defect': True})
+        lead = scan_listings([damaged], comp_index=index(), fees=FEES)['ranked_leads'][0]
+        self.assertEqual(lead['review_queue'], 'REJECTED_CONDITION')
+
+    def test_misspelling_is_a_review_proposal_and_language_conflicts_stop_scoring(self):
+        from dataclasses import replace
+        from holy_pokemon.title_parser import parse_title
+
+        catalog = CompIndex([replace(index().records[0], card='Pikachu', number='60')])
+        row = listing(title='Pokemon Jungle Pickachu #60 Unlimited Holo PSA 9', lane='poor_title')
+        for field in ('card', 'number', 'set_name', 'edition', 'finish', 'language'):
+            row.pop(field)
+        scored = scan_listings([row], comp_index=catalog, fees=FEES)['ranked_leads'][0]
+        self.assertEqual(scored['identity_review_proposal']['card'], 'Pikachu')
+        self.assertEqual(scored['status'], 'MISSING_EXACT_IDENTITY')
+        title = listing()['title'].replace('Pokemon', 'Dutch Pokemon')
+        self.assertEqual(parse_title(title).language, 'Dutch')
+        scored = scan_listings([listing(title=title)], comp_index=index(), fees=FEES)['ranked_leads'][0]
+        self.assertEqual(scored['status'], 'IDENTITY_TITLE_CONFLICT')
+
+    def test_same_sale_aliases_count_once_and_conflicts_exclude_transaction(self):
+        from dataclasses import replace
+
+        record = replace(index().records[0], source_url='https://www.ebay.com/itm/123456789012')
+        alternate = replace(record, source_url='https://www.ebay.com/itm/Vaporeon/123456789012?tracking=test')
+        self.assertEqual(len(CompIndex([record, alternate]).records), 1)
+        conflict = CompIndex([record, alternate, replace(alternate, price_usd=D('400'))])
+        self.assertEqual(conflict.records, [])
+        self.assertEqual(conflict.conflicting_ebay_item_ids, {'123456789012'})
+
+    def test_enrichment_repairs_missing_original_comps_once_for_multiple_copies(self):
+        complete = index()
+        thin = CompIndex(r for r in complete.records if r.grader != 'PSA')
+        rows = [listing(), listing(listing_id='v1|222222222222|0')]
+
+        class Client:
+            calls = 0
+            max_calls = 3
+
+        with patch('holy_pokemon.compsniper.enrich_comp_index',
+                   return_value=(complete, {'added': 3})) as enrich:
+            report = scan_listings(rows, comp_index=thin, fees=FEES, live=True, comp_client=Client())
+        enrich.assert_called_once()
+        self.assertEqual(enrich.call_args.kwargs, {'target_grader': 'PSA', 'target_grade': '9'})
+        self.assertEqual([row['review_queue'] for row in report['ranked_leads']],
+                         ['PRIORITY_REVIEW', 'PRIORITY_REVIEW'])
+
+    def test_queries_share_page_requests_and_paginate_round_robin(self):
+        class Client:
+            page_size = 100
+
+            def __init__(self):
+                self.calls = []
+
+            def search_page(self, query, *, offset, **kwargs):
+                self.calls.append((query, offset))
+                return {'rows': [listing()], 'has_more': offset == 0}
+
+        query = dict(ebay_query='Vaporeon', lane='high_spread', buying_option='FIXED_PRICE',
+                     sort='newlyListed', target_grader='PSA', target_grade_bucket='10')
+        client = Client()
+        rows, errors = discover_listings(client, [
+            query, dict(query, target_grader='CGC', target_grade_bucket='GEM_MINT_10'),
+            dict(query, ebay_query='Jolteon'),
+        ], pages_per_query=2)
+        self.assertFalse(errors)
+        self.assertEqual(client.calls, [('Vaporeon', 0), ('Jolteon', 0),
+                                        ('Vaporeon', 100), ('Jolteon', 100)])
+        self.assertEqual(len(rows), 6)
 
     def test_saved_cache_loaded_read_only(self):
         from holy_pokemon.scan_pipeline import load_saved_listings

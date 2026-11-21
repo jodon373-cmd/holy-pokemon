@@ -11,23 +11,29 @@ from pathlib import Path
 from typing import Any, Iterable, Mapping
 
 from .comp_index import CompIndex
-from .roi_scorer import FeeSchedule, score_opportunity
+from .roi_scorer import FeeSchedule, _money, listing_ask, score_opportunity
 from .strategy_common import export_csv
 from .ingestion import SeenListingStore
 
 
 def load_saved_listings(database, *, limit=100):
-    """Read an existing bot cache without creating tables or changing its records."""
+    """Read the saved feed without writing to its database. None scans the entire cache."""
     import sqlite3
-    if not 1 <= int(limit) <= 500:
-        raise ValueError('Saved-lead limit must be1..500')
-    path=Path(database).resolve()
+    if limit is not None and int(limit) < 1:
+        raise ValueError('Saved-lead limit must be positive')
+    path = Path(database).resolve()
     if not path.is_file():
         return []
-    db=sqlite3.connect(path.as_uri()+'?mode=ro',uri=True)
+    db = sqlite3.connect(path.as_uri() + '?mode=ro', uri=True)
     try:
-        rows=db.execute("SELECT payload FROM record WHERE kind='lead' ORDER BY created_at DESC LIMIT ?",(int(limit),)).fetchall()
-        return [dict(json.loads(r[0]),source_dataset='SAVED_BOT_CACHE_AVAILABILITY_NOT_REFRESHED') for r in rows]
+        rows = db.execute(
+            "SELECT payload FROM record WHERE kind='lead' ORDER BY created_at DESC LIMIT ?",
+            (-1 if limit is None else int(limit),),
+        )
+        return [
+            dict(json.loads(payload), source_dataset='SAVED_BOT_CACHE_AVAILABILITY_NOT_REFRESHED')
+            for (payload,) in rows
+        ]
     finally:
         db.close()
 
@@ -57,6 +63,7 @@ def dedupe_listings(listings):
         combined={}
         for row in group:
             combined.update({k:v for k,v in row.items() if v is not None})
+        combined['query_priority'] = max((row.get('query_priority') or 0 for row in group), default=0)
         combined['matched_lanes']=sorted({str(r.get('lane')) for r in group if r.get('lane')})
         combined['seen_aliases']=sorted({a for r in group for a in SeenListingStore.aliases(r)})
         combined['route_options']=[dict(target_grader=g,target_grade_bucket=b) for g,b in
@@ -165,25 +172,98 @@ def download_listing_photos(item, directory):
     return paths
 
 
-def discover_listings(client, plan):
-    rows=[];errors=[]
-    for q in plan:
-        filters={'buyingOptions':'{'+q['buying_option']+'}'}
-        if q.get('item_end_date'):
-            filters['itemEndDate']=q['item_end_date']
-        try:
-            page=client.search_page(q['ebay_query'],filters=filters,sort=q['sort'],
-                max_price=q.get('max_price'),condition_ids=q.get('condition_ids'),
-                fieldgroups=q.get('fieldgroups'),expected_grader=q.get('expected_grader'),
-                expected_grade=q.get('expected_grade'),condition_descriptors=q.get('condition_descriptors'))
-        except (RuntimeError,ValueError) as exc:
-            errors.append(dict(query=q['ebay_query'],error=type(exc).__name__))
-            break  # Never retry a failed provider call through another lane.
-        for row in page['rows']:
-            rows.append(dict(row,lane=q['lane'],query_priority=q.get('priority_score',0),
-                proposed_target_grader=q.get('target_grader','CGC'),
-                proposed_target_grade=q.get('target_grade_bucket','GEM_MINT_10')))
-    return rows,errors
+def discover_listings(client, plan, *, pages_per_query=1):
+    """Fan out identical requests and visit each first page before requesting deeper pages."""
+    if pages_per_query < 1:
+        raise ValueError('pages_per_query must be positive')
+    requests = {}
+    for query in plan:
+        params = {
+            'filters': {'buyingOptions': '{' + query['buying_option'] + '}'},
+            'sort': query['sort'],
+        }
+        if query.get('item_end_date'):
+            params['filters']['itemEndDate'] = query['item_end_date']
+        for key in ('max_price', 'condition_ids', 'fieldgroups', 'aspect_filter',
+                    'expected_grader', 'expected_grade', 'condition_descriptors'):
+            if query.get(key) is not None:
+                params[key] = query[key]
+        key = (query['ebay_query'], json.dumps(params, sort_keys=True))
+        requests.setdefault(key, (params, []))[1].append(query)
+    pending = [(keyword, params, queries) for (keyword, _), (params, queries) in requests.items()]
+    rows = []
+    for depth in range(pages_per_query):
+        if not pending:
+            break
+        offset = depth * client.page_size if depth else 0
+        if offset >= 10000:
+            break
+        next_page = []
+        for keyword, params, queries in pending:
+            try:
+                page = client.search_page(keyword, offset=offset, **params)
+            except (RuntimeError, ValueError) as exc:
+                return rows, [dict(query=keyword, offset=offset, error=type(exc).__name__)]
+            for row in page['rows']:
+                for query in queries:
+                    rows.append(dict(
+                        row, lane=query['lane'], query_priority=query.get('priority_score', 0),
+                        proposed_target_grader=query.get('target_grader', 'CGC'),
+                        proposed_target_grade=query.get('target_grade_bucket', 'GEM_MINT_10'),
+                    ))
+            if page.get('has_more') and not page.get('window_exhausted'):
+                next_page.append((keyword, params, queries))
+        pending = next_page
+    return rows, []
+
+
+def _route_rank(route):
+    target_count = (route.get('target_comp') or {}).get('count', 0)
+    original_count = (((route.get('original_grade_fallback') or {}).get('comp')) or {}).get('count', 0)
+    incremental = route.get('incremental_over_original')
+    return (
+        route.get('financial_gate') == 'WITHIN_MODELED_CEILING',
+        incremental is not None and float(incremental) > 0,
+        target_count >= 3 and original_count >= 3,
+        route['opportunity_score'],
+        float(incremental) if incremental is not None else float('-inf'),
+        route['target_route'],
+    )
+
+
+def _score_routes(item, index, default_route, fees):
+    primary = (item.get('proposed_target_grader', default_route[0]),
+               item.get('proposed_target_grade', default_route[1]))
+    routes = {primary}
+    if not item.get('route_steps'):
+        routes.update((opt['target_grader'], opt['target_grade_bucket'])
+                      for opt in item.get('route_options', []))
+    return sorted([
+        score_opportunity(
+            listing=item, card=str(item.get('card') or '').strip(),
+            number=str(item.get('number') or '').strip(), comp_index=index,
+            target_grader=grader, target_grade_bucket=grade,
+            set_name=item.get('set_name') or item.get('set'),
+            edition=item.get('edition'), fees=fees,
+        )
+        for grader, grade in routes
+    ], key=_route_rank, reverse=True)
+
+
+def _comp_lookup_key(item, grader, grade):
+    identity = (item.get('card'), item.get('number'), item.get('set_name') or item.get('set'),
+                item.get('edition'), item.get('finish'), item.get('language') or 'English')
+    return (*[str(value or '').strip().casefold() for value in identity], grader, grade)
+
+
+def _thin_route_sides(route):
+    grader, grade = route['target_route'].split('_', 1)
+    if (route.get('target_comp') or {}).get('count', 0) < 3:
+        yield grader, grade
+    origin = route['parsed']
+    original_comp = (route.get('original_grade_fallback') or {}).get('comp') or {}
+    if origin['grader'] and origin['grade'] and original_comp.get('count', 0) < 3:
+        yield origin['grader'], origin['cgc_sub_tier'] or origin['grade']
 
 
 def scan_listings(
@@ -213,65 +293,81 @@ def scan_listings(
     duplicate_count=len(raw)-len(deduped)
     old_count=0
 
+    default_route = (target_grader, target_grade_bucket)
+    candidates = []
     for item in deduped:
-        item = dict(item)
         if seen_store is not None:
-            fresh=seen_store.observe(item)
-            # Persist all merged aliases, including those appearing only in an earlier lane.
-            from datetime import datetime,timezone
-            with seen_store.db:
-                seen_store.db.executemany('INSERT OR IGNORE INTO seen_listing_alias VALUES(?,?)',
-                    [(a,datetime.now(timezone.utc).isoformat()) for a in item['seen_aliases']])
+            fresh = seen_store.observe(item)
             if only_new and not fresh:
-                old_count+=1
+                old_count += 1
                 continue
-            item['new_listing_alert']=fresh
+            item['new_listing_alert'] = fresh
         if not item.get('card'):
-            proposal = idx.match_title(str(item.get('title') or ''),allow_missing_set='poor_title' in item.get('matched_lanes',[]))
+            title = str(item.get('title') or '')
+            poor_title = 'poor_title' in item.get('matched_lanes', [])
+            proposal = idx.match_title(title, allow_missing_set=poor_title)
+            if not proposal and poor_title:
+                from .title_parser import repair_known_card_typos
+
+                repaired = repair_known_card_typos(title)
+                if repaired != title:
+                    item['identity_review_proposal'] = idx.match_title(repaired, allow_missing_set=True)
             if proposal:
                 item.update(proposal)
                 item['identity_basis'] = 'UNIQUE_TITLE_CATALOG_PROPOSAL_NOT_PHOTO_VERIFIED'
-        card = str(item.get("card") or "").strip()
-        number = str(item.get("number") or "").strip()
-        geometry = None
-        route_grader=item.get('proposed_target_grader',target_grader)
-        route_grade=item.get('proposed_target_grade',target_grade_bucket)
-        scored = score_opportunity(
-            listing=item,
-            card=card,
-            number=number,
-            comp_index=idx,
-            target_grader=route_grader,
-            target_grade_bucket=route_grade,
-            set_name=item.get("set_name") or item.get("set"),
-            edition=item.get("edition"),
-            centering_result=geometry or item.get("centering"),
-            fees=fees,
-        )
-        if geometry:
-            scored['centering_v3_consensus'] = geometry
+        routes = _score_routes(item, idx, default_route, fees)
         review = item.get('condition_review') or {}
-        promising = review.get('original_photos_reviewed') is True and review.get('visible_condition') == 'PROMISING'
-        scored['condition_review'] = review
-        scored['owner_comp_review_requested'] = bool(promising)
-        scored['condition_priority'] = 1 if promising else 0
-        strong=scored.get('opportunity_score',0)>=60 or promising or item.get('query_priority',0)>=60
-        enrichment=None
-        if live and comp_client is not None and strong and (scored.get('target_comp') or {}).get('count',0)<3:
-            from .compsniper import enrich_comp_index
-            if comp_client.calls < comp_client.max_calls:
-                try:
-                    idx,enrichment=enrich_comp_index(comp_client,idx,item,target_grader=route_grader,target_grade=route_grade)
-                    if enrichment['added']:
-                        scored=score_opportunity(listing=item,card=card,number=number,comp_index=idx,
-                            target_grader=route_grader,target_grade_bucket=route_grade,set_name=item.get('set_name') or item.get('set'),
-                            edition=item.get('edition'),fees=fees)
-                        scored.update(condition_review=review,owner_comp_review_requested=promising,condition_priority=int(promising))
-                except (RuntimeError,ValueError) as exc:
-                    enrichment=dict(status='PROVIDER_STOPPED',reason=type(exc).__name__,added=0)
-                    comp_client.max_calls=comp_client.calls
-        scored['live_comp_enrichment']=enrichment
-        if inspect_images and strong and float(item.get('asking_price') or item.get('ask') or 0)<=inspection_price_limit:
+        promising = (review.get('original_photos_reviewed') is True
+                     and review.get('visible_condition') == 'PROMISING')
+        candidates.append((item, routes, promising))
+
+    enrichments = {}
+    if live and comp_client is not None:
+        from .compsniper import enrich_comp_index
+
+        # Spend provider quota on the strongest unresolved routes across the entire batch.
+        pending = sorted(candidates, key=lambda entry: (
+            entry[2], _route_rank(entry[1][0]), entry[0].get('query_priority') or 0,
+            str(entry[0].get('listing_id') or entry[0].get('id') or ''),
+        ), reverse=True)
+        for item, routes, promising in pending:
+            if comp_client.calls >= comp_client.max_calls:
+                break
+            for route in routes:
+                if (route['status'] not in ('SCORED_LEAD', 'MISSING_TARGET_COMPS')
+                    or route.get('financial_gate') == 'OVER_MAX_OFFER'
+                    or not (promising or route['opportunity_score'] > 0
+                            or (item.get('query_priority') or 0) >= 60)):
+                    continue
+                for grader, grade in _thin_route_sides(route):
+                    key = _comp_lookup_key(item, grader, grade)
+                    if key in enrichments or comp_client.calls >= comp_client.max_calls:
+                        continue
+                    try:
+                        idx, enrichment = enrich_comp_index(
+                            comp_client, idx, item, target_grader=grader, target_grade=grade)
+                    except (RuntimeError, ValueError) as exc:
+                        enrichment = dict(status='PROVIDER_STOPPED', reason=type(exc).__name__, added=0)
+                        comp_client.max_calls = comp_client.calls
+                    enrichments[key] = enrichment
+
+    for item, initial_routes, promising in candidates:
+        ranked = _score_routes(item, idx, default_route, fees) if enrichments else initial_routes
+        scored = ranked[0]
+        review = item.get('condition_review') or {}
+        scored.update(condition_review=review, owner_comp_review_requested=promising,
+                      condition_priority=int(promising))
+        strong = (scored['opportunity_score'] >= 60 or promising
+                  or (item.get('query_priority') or 0) >= 60)
+        grader, grade = scored['target_route'].split('_', 1)
+        scored['live_comp_enrichment'] = enrichments.get(_comp_lookup_key(item, grader, grade))
+        origin = scored['parsed']
+        scored['original_comp_enrichment'] = enrichments.get(
+            _comp_lookup_key(item, origin['grader'], origin['cgc_sub_tier'] or origin['grade'])
+        )
+        ask = _money(listing_ask(item))
+        has_local_photos = any(item.get(key) for key in ('photo_paths', 'image_path', 'front_image_path', 'back_image_path'))
+        if inspect_images and ask is not None and ask <= inspection_price_limit and (strong or has_local_photos):
             if image_fetcher is not None and not item.get('photo_paths'):
                 try:
                     item['photo_paths']=image_fetcher(item)
@@ -282,14 +378,32 @@ def scan_listings(
         else:
             scored['inspection']=dict(status='NOT_INSPECTED',grade_prediction=None,trade_approved=False)
         scored['matched_lanes']=item.get('matched_lanes',[])
-        alternatives=[]
-        for option in item.get('route_options',[]):
-            alt=score_opportunity(listing=item,card=card,number=number,comp_index=idx,
-                target_grader=option['target_grader'],target_grade_bucket=option['target_grade_bucket'],
-                set_name=item.get('set_name') or item.get('set'),edition=item.get('edition'),fees=fees)
-            alternatives.append({k:alt.get(k) for k in ('target_route','status','total_investment_usd',
-                'target_comp','conservative_net_profit_usd','incremental_over_original','max_offer_usd','financial_gate','warnings')})
-        scored['route_comparison']=alternatives
+        scored['identity_review_proposal'] = item.get('identity_review_proposal')
+        scored['listing_evidence'] = {
+            'source_dataset': item.get('source_dataset'),
+            'retrieved_at': item.get('retrieved_at') or item.get('observed_at'),
+            'buying_options': item.get('buying_options', []),
+            'availability_refreshed': False,
+        }
+        scored['route_comparison'] = [
+            {key: route.get(key) for key in (
+                'target_route', 'status', 'total_investment_usd', 'target_comp',
+                'conservative_net_profit_usd', 'incremental_over_original', 'max_offer_usd',
+                'financial_gate', 'failure_scenarios', 'source_urls', 'warnings',
+            )}
+            for route in ranked
+        ]
+        veto = (review.get('visible_defect') is True or review.get('visible_condition') == 'REJECT'
+                or review.get('slab_glare') is True)
+        if veto:
+            scored['opportunity_score'] = 0.0
+            scored['warnings'] = list(dict.fromkeys([*scored['warnings'], 'CONDITION_REVIEW_VETO']))
+        scored['review_queue'] = (
+            'REJECTED_CONDITION' if veto else
+            'PRIORITY_REVIEW' if (_route_rank(scored)[:3] == (True, True, True)
+                                  and not item.get('shared_cert_multiple_listings')) else
+            'RESEARCH'
+        )
         scored['new_listing_alert']=item.get('new_listing_alert',False)
         if item.get('shared_cert_multiple_listings'):
             scored['warnings'].append('SHARED_CERT_MULTIPLE_LISTINGS')
@@ -301,9 +415,14 @@ def scan_listings(
                 continue
         results.append(scored)
 
-    results.sort(key=lambda r: ((r['condition_priority'] if condition_first else 0),float(r.get('opportunity_score') or 0)), reverse=True)
+    results.sort(key=lambda row: (
+        {'PRIORITY_REVIEW': 2, 'RESEARCH': 1, 'REJECTED_CONDITION': 0}[row['review_queue']],
+        row['condition_priority'] if condition_first else 0, _route_rank(row),
+    ), reverse=True)
     return {
-        "mode": "OFFLINE_SCAN_RESEARCH_ONLY",
+        "mode": "LIVE_RESEARCH_ONLY" if live else "OFFLINE_SCAN_RESEARCH_ONLY",
+        "comp_enrichment_attempts": len(enrichments),
+        "conflicting_ebay_sales_excluded": len(idx.conflicting_ebay_item_ids),
         "trade_approved": False,
         "condition_first": condition_first,
         "total_scanned": len(deduped)-old_count,
@@ -318,7 +437,10 @@ def scan_listings(
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--input", help="JSON candidates; omitted means an empty offline scan")
+    p.add_argument("--input", help="JSON candidates")
+    p.add_argument('--saved-db', type=Path, help='Replay the saved SQLite lead cache read-only')
+    p.add_argument('--saved-limit', type=int, help='Limit replay to the most recent saved rows')
+    p.add_argument('--export-limit', type=int, help='Export only the first N ranked rows while retaining scan counts')
     p.add_argument("--output-json", help="Optional path to write ranked JSON report")
     p.add_argument("--output-csv", help="Optional path to write ranked CSV report")
     p.add_argument("--target-grader", default="CGC")
@@ -332,6 +454,9 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument('--discover',action='store_true',help='Run the four-lane Browse plan; requires --live')
     p.add_argument('--plan',action='store_true',help='Print the four-lane plan without network calls')
     p.add_argument('--query-limit',type=int,default=25)
+    p.add_argument('--universe', action='append', type=Path, help='Exact catalog CSV to add to the built-in discovery seeds')
+    p.add_argument('--exploration-offset', type=int, help='Rotate a third of remaining query slots into the catalog tail')
+    p.add_argument('--pages-per-query', type=int, default=1, help='Round-robin page depth for Browse searches')
     p.add_argument('--max-price',type=float,default=500)
     p.add_argument('--auction-window-hours',type=float,default=6)
     p.add_argument('--max-requests',type=int,default=30)
@@ -340,33 +465,53 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument('--only-new',action='store_true')
     p.add_argument('--seen-db',default='outputs/seen_listings.sqlite3')
     args = p.parse_args(argv)
+    if args.saved_db and not args.saved_db.is_file():
+        p.error('--saved-db must point to an existing database')
+    if any(value is not None and value < 1 for value in (args.saved_limit, args.export_limit)):
+        p.error('Replay and export limits must be positive')
+    if args.pages_per_query < 1:
+        p.error('--pages-per-query must be positive')
 
     raw = json.loads(Path(args.input).read_text(encoding="utf-8")) if args.input else []
     listings = raw["listings"] if isinstance(raw, dict) and "listings" in raw else raw
-    idx=CompIndex.from_csvs(args.comp_csv) if args.comp_csv else CompIndex.from_csvs()
+    if args.saved_db and not args.plan:
+        saved = load_saved_listings(args.saved_db, limit=args.saved_limit)
+        listings = [*listings, *saved] if listings else saved
+    from .comp_index import DEFAULT_SOURCES
+    idx = CompIndex.from_csvs([*DEFAULT_SOURCES, *(args.comp_csv or [])])
     discovery_errors=[]
     if args.plan or args.discover:
         from .query_planner import four_lane_plan
-        plan=four_lane_plan(comp_index=idx,limit=args.query_limit,
-            auction_window_hours=args.auction_window_hours,max_price=args.max_price)
+        identities = None
+        if args.universe:
+            from .open_strategy_discovery import DEFAULT_JUNGLE, DEFAULT_CROSS_SET, load_universe
+            identities, skipped_universe_rows = load_universe([DEFAULT_JUNGLE, DEFAULT_CROSS_SET, *args.universe])
+            if skipped_universe_rows:
+                import sys
+                print(f'Skipped {len(skipped_universe_rows)} incomplete catalog rows', file=sys.stderr)
+        plan = four_lane_plan(identities=identities, comp_index=idx, limit=args.query_limit,
+            auction_window_hours=args.auction_window_hours, max_price=args.max_price,
+            exploration_offset=args.exploration_offset)
         if args.plan:
             print(json.dumps(dict(mode='OFFLINE_FOUR_LANE_PLAN',queries=plan,trade_approved=False),indent=2))
             return 0
         if not args.live:
             p.error('--discover requires explicit --live')
-        from .ebay_config import read_env_file, ENV_FILE
+        from .ebay_config import read_env_file, ENV_FILE, operator_authorized
         from .ebay_browse import EbayBrowse,credentials
         from .store import Store
         import os
         if ENV_FILE.exists():
             for key,value in read_env_file().items():
                 os.environ.setdefault(key,value)
+        if not operator_authorized():
+            p.error('eBay production approval must be configured before discovery')
         cid,secret=credentials()
         with Store() as store:
             client=EbayBrowse(store.db,enabled=True,production_approved=True,
                 client_id=cid,client_secret=secret,daily_limit=args.daily_limit,
                 run_limit=args.max_requests,page_size=100)
-            discovered,discovery_errors=discover_listings(client,plan)
+            discovered,discovery_errors=discover_listings(client, plan, pages_per_query=args.pages_per_query)
             listings=[*listings,*discovered]
     comp_client=None
     if args.live:
@@ -388,6 +533,13 @@ def main(argv: list[str] | None = None) -> int:
     if seen:
         seen.close()
     report['discovery_errors']=discovery_errors
+    report['review_queue_counts'] = {}
+    for row in report['ranked_leads']:
+        queue = row['review_queue']
+        report['review_queue_counts'][queue] = report['review_queue_counts'].get(queue, 0) + 1
+    if args.export_limit is not None:
+        report['ranked_leads'] = report['ranked_leads'][:args.export_limit]
+    report['exported_count'] = len(report['ranked_leads'])
     if args.output_json:
         out = Path(args.output_json)
         out.parent.mkdir(parents=True, exist_ok=True)
@@ -414,6 +566,7 @@ def main(argv: list[str] | None = None) -> int:
                 "source_urls":r.get('source_urls',[]),
                 "warnings":r.get('warnings',[]),
                 "financial_gate":r.get('financial_gate'),
+                "review_queue":r.get('review_queue'),
             }
             for r in report["ranked_leads"]
         ]

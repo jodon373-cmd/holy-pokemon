@@ -1,6 +1,6 @@
 """Conditional, costed research scenarios. Scores are not expected returns."""
-from dataclasses import dataclass
-from decimal import Decimal, InvalidOperation
+from dataclasses import dataclass, replace
+from decimal import Decimal, InvalidOperation, ROUND_FLOOR
 from typing import Any, Mapping
 from .comp_index import CompIndex
 from .title_parser import parse_title
@@ -44,6 +44,17 @@ def _money(value):
         return None
 
 
+def listing_ask(listing):
+    """Use a BIN price when available, otherwise the observed USD auction bid."""
+    ask = listing.get('asking_price', listing.get('ask'))
+    if ask not in (None, '') or 'AUCTION' not in (listing.get('buying_options') or []):
+        return ask
+    bid = listing.get('current_bid')
+    if isinstance(bid, Mapping):
+        return bid.get('value') if bid.get('currency') == 'USD' else None
+    return bid
+
+
 def score_opportunity(*, listing: Mapping[str, Any], card: str, number: str,
                       comp_index: CompIndex, target_grader='CGC',
                       target_grade_bucket='GEM_MINT_10', set_name=None,
@@ -79,13 +90,35 @@ def score_opportunity(*, listing: Mapping[str, Any], card: str, number: str,
         return stop('UNAVAILABLE')
     if listing.get('currency', 'USD') != 'USD':
         return stop('UNSUPPORTED_CURRENCY')
-    ask = _money(listing.get('asking_price', listing.get('ask')))
+    raw_ask = listing_ask(listing)
+    ask = _money(raw_ask)
+    if not parsed.grader or not parsed.grade:
+        return stop('MISSING_ORIGINAL_GRADE')
+    if parsed.grader == target_grader and (parsed.cgc_sub_tier or parsed.grade) == target_grade_bucket:
+        return stop('ALREADY_TARGET_GRADE')
+    listing_tax = listing.get('purchase_tax_pct')
+    if automatic_fees and listing_tax not in (None, ''):
+        tax_pct = _money(listing_tax)
+        if tax_pct is None or tax_pct > 100:
+            return stop('INVALID_COST')
+        fees = replace(fees, purchase_tax_pct=tax_pct)
+    premium_quote = listing.get('buyer_premium_pct')
+    premium_pct = _money('0' if premium_quote in (None, '') else premium_quote)
+    result['buyer_premium_is_assumption'] = premium_quote in (None, '')
+    if premium_pct is None:
+        return stop('INVALID_COST')
+    purchase_multiplier = 1 + fees.purchase_tax_pct / 100
+    premium_multiplier = 1 + premium_pct / 100
+    result['fee_assumptions'] = {k: str(v) for k, v in vars(fees).items()}
+    result['buyer_premium_pct'] = str(premium_pct)
+    result['observed_price_basis'] = ('AUCTION_BID' if listing.get('asking_price', listing.get('ask')) in (None, '')
+                                      else 'LISTING_ASK')
     shipping = _money(listing.get('shipping', listing.get('buyer_shipping')))
     if ask is None:
-        return stop('INVALID_COST' if listing.get('asking_price', listing.get('ask')) not in (None,'') else 'SKIPPED_NO_ASKING_PRICE')
+        return stop('INVALID_COST' if raw_ask not in (None,'') else 'SKIPPED_NO_ASKING_PRICE')
     if shipping is None:
         return stop('INVALID_COST' if listing.get('shipping', listing.get('buyer_shipping')) not in (None,'') else 'MISSING_SHIPPING_COST')
-    landed = ((ask + shipping) * (1 + fees.purchase_tax_pct / 100)).quantize(CENT)
+    landed = ((ask * premium_multiplier + shipping) * purchase_multiplier).quantize(CENT)
     grading = fees.grading_fee + fees.grading_shipping + fees.grading_insurance + fees.upcharge + fees.supplies
     steps = listing.get('route_steps')
     if steps:
@@ -124,7 +157,6 @@ def score_opportunity(*, listing: Mapping[str, Any], card: str, number: str,
     if target is None:
         return stop('MISSING_TARGET_COMPS')
     if automatic_fees and target_grader=='CGC' and not steps:
-        from dataclasses import replace
         # Declared value uses the contemplated graded card, not the lower-grade purchase price.
         declared=_money(listing.get('declared_value_usd',target.p25_usd))
         if declared is None:
@@ -161,7 +193,7 @@ def score_opportunity(*, listing: Mapping[str, Any], card: str, number: str,
         result['opportunity_score'] = round(min(100, min(60,float(conservative/investment*100)*.6)
                                                + min(30,target.count*5) + parsed.confidence*10),1)
     _fredy_economics(result, listing, parsed, comp_index, common, target, fees,
-                     ask, shipping, landed, grading, investment, target_grader)
+                     ask, shipping, landed, grading, investment, target_grader, premium_multiplier)
     if result['financial_gate']=='OVER_MAX_OFFER':
         result['opportunity_score']=0.0
     elif result['financial_gate']!='WITHIN_MODELED_CEILING':
@@ -169,8 +201,19 @@ def score_opportunity(*, listing: Mapping[str, Any], card: str, number: str,
     return stop('SCORED_LEAD')
 
 
+def _minimum_success_rate(success, failure, hurdle):
+    """Two-outcome sensitivity hurdle. This is a required rate, never a prediction."""
+    if hurdle is None:
+        return None
+    if failure >= hurdle:
+        return '0.0000'
+    if success < hurdle or success <= failure:
+        return None
+    return str(((hurdle - failure) / (success - failure)).quantize(D('0.0001')))
+
+
 def _fredy_economics(result, listing, parsed, idx, common, target, fees,
-                     ask, shipping, landed, grading, investment, target_grader):
+                     ask, shipping, landed, grading, investment, target_grader, premium_multiplier):
     """Fredy rules as explicit, costed scenarios; no selected-cohort success probabilities."""
     from .fredy_business import operating_rules
     result['fredy_rule_ids'] = [r['id'] for r in operating_rules()]
@@ -213,24 +256,26 @@ def _fredy_economics(result, listing, parsed, idx, common, target, fees,
     annual = _money(listing.get('annual_capital_cost_pct', '0'))
     if days is None or annual is None:
         raise ValueError('Invalid capital duration/cost')
-    capital_cost = investment * annual/100 * days/365
+    carry_rate = annual / 100 * days / 365
+    capital_cost = investment * carry_rate
     if original_net is not None:
         result['incremental_over_original']=_q(net(target.p25_usd)-grading-capital_cost-original_net)
     proceeds = net(target.p25_usd)
     tax = 1 + fees.purchase_tax_pct/100
-    target_cap = min((proceeds-grading-capital_cost-margin-reserve)/tax-shipping,
-                     (proceeds/(1+roi/100)-grading-capital_cost-reserve)/tax-shipping)
-    fallback_cap = (original_net-margin-reserve)/tax-shipping if original_net is not None else None
-    # A profitable upgraded exit never excuses an overpriced source slab.
-    ceiling = min(target_cap, fallback_cap) if fallback_cap is not None else target_cap
-    ceiling = max(D('0'), ceiling)
+    # Evaluate financing at the proposed offer, rather than at the current ask.
+    cost_multiplier = 1 + carry_rate
+    allowed_cost = min(proceeds - margin - reserve, proceeds / (1 + roi / 100) - reserve)
+    target_cap = ((allowed_cost / cost_multiplier - grading) / tax - shipping) / premium_multiplier
+    fallback_cap = ((original_net-margin-reserve)/tax-shipping) / premium_multiplier if original_net is not None else None
+    raw_ceiling = min(target_cap, fallback_cap) if fallback_cap is not None else target_cap
+    ceiling = max(D('0'), raw_ceiling).quantize(CENT, rounding=ROUND_FLOOR)
     result.update(max_offer_usd=_q(ceiling), target_max_offer_usd=_q(max(D('0'), target_cap)),
                   original_fallback_max_offer_usd=_q(max(D('0'), fallback_cap)) if fallback_cap is not None else None,
                   required_margin_usd=_q(margin), required_roi_pct=_q(roi))
-    auction = 'AUCTION' in listing.get('buying_options', [])
+    auction = 'AUCTION' in (listing.get('buying_options') or [])
     result['max_bid_ceiling'] = _q(ceiling) if auction else None
     result['financial_gate'] = ('MISSING_ORIGINAL_FALLBACK' if original is None else
-                                'OVER_MAX_OFFER' if ask > ceiling else
+                                'OVER_MAX_OFFER' if raw_ceiling < 0 or ask > ceiling else
                                 'BGS_SUBGRADE_REVIEW' if 'UNVERIFIED_SUBGRADES' in result['warnings'] else
                                 'WITHIN_MODELED_CEILING')
     failures = []
@@ -239,9 +284,22 @@ def _fredy_economics(result, listing, parsed, idx, common, target, fees,
             continue
         comp = idx.summarize(grader=target_grader, grade_bucket=grade, **common)
         if comp:
-            failures.append(dict(grader=target_grader, grade=grade, comp=comp.to_dict(),
-                                 net_profit_usd=_q(net(comp.p25_usd)-investment)))
+            failure_net = net(comp.p25_usd)
+            target_net = proceeds - grading - capital_cost
+            failure_net_after_grading = failure_net - grading - capital_cost
+            failures.append(dict(
+                grader=target_grader, grade=grade, comp=comp.to_dict(),
+                net_profit_usd=_q(failure_net_after_grading - landed),
+                minimum_upgrade_rate_to_break_even=_minimum_success_rate(
+                    target_net, failure_net_after_grading, landed),
+                minimum_upgrade_rate_to_beat_original=_minimum_success_rate(
+                    target_net, failure_net_after_grading, original_net),
+            ))
     result['failure_scenarios'] = failures
+    if failures and listing.get('failure_mode') != 'intact_rejected':
+        worst = min(failures, key=lambda scenario: D(scenario['net_profit_usd']))
+        result['downside_net_profit_usd'] = worst['net_profit_usd']
+        result['break_even_upgrade_rate'] = worst['minimum_upgrade_rate_to_break_even']
     result['maximum_capital_at_risk_usd'] = _q(investment)
     result['failure_scenarios_are_not_guaranteed_floor'] = True
     result['source_urls'] = list(dict.fromkeys([*target.source_urls,

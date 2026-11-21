@@ -117,6 +117,9 @@ def plan_queries(
     """Rank search queries by historical comp spread and comp depth."""
     planned: list[PlannedQuery] = []
     for ident in identities:
+        from .title_parser import parse_title
+
+        finish = parse_title(ident.edition).finish
         target_comp = comp_index.summarize(
             card=ident.card,
             number=ident.number,
@@ -124,6 +127,7 @@ def plan_queries(
             grade_bucket=target_grade_bucket,
             set_name=ident.set,
             edition=ident.edition,
+            language=ident.language, finish=finish,
         )
         origin_comp = comp_index.summarize(
             card=ident.card,
@@ -132,6 +136,7 @@ def plan_queries(
             grade_bucket=origin_grade,
             set_name=ident.set,
             edition=ident.edition,
+            language=ident.language, finish=finish,
         )
 
         prio = 10.0
@@ -144,7 +149,11 @@ def plan_queries(
             else:
                 prio += min(30.0, float(target_comp.p25_usd / Decimal("25")))
 
-        ebay_q = build_ebay_query(ident, origin_grader=origin_grader, origin_grade=origin_grade)
+        try:
+            ebay_q = build_ebay_query(ident, origin_grader=origin_grader, origin_grade=origin_grade)
+        except ValueError:
+            # One long external catalog identity must not abort discovery for the rest.
+            continue
         cs_kw = " ".join(p for p in ("Pokemon", ident.set, ident.card, ident.number) if p)
 
         planned.append(
@@ -178,9 +187,9 @@ def plan_default_universe(*, limit: int | None = 25, **route) -> list[dict[str, 
 
 
 def four_lane_plan(identities=None, comp_index=None, *, limit=100,
-                   auction_window_hours=6, now=None, max_price=500):
+                   auction_window_hours=6, now=None, max_price=500, exploration_offset=None):
     """Quota-bounded research requests, with route seeds rather than a card whitelist."""
-    from .title_parser import parse_title
+    from .title_parser import CARD_NAME_TYPOS, parse_title
     from .promo_priority import queries as promo_queries
     if auction_window_hours <= 0 or limit < 1:
         raise ValueError('Positive auction window and query limit required')
@@ -222,9 +231,9 @@ def four_lane_plan(identities=None, comp_index=None, *, limit=100,
                                    buying_option='AUCTION', item_end_date='[..'+end+']'))
             # Low-competition omissions remain proposals, never exact identity approval.
             low = ' '.join([p.card, '#'+p.number, grader, grade, '-lot', '-proxy'])
-            typos = {'Charizard':'(Charizard,Charzard)', 'Blastoise':'(Blastoise,Blastiose)',
-                     'Gyarados':'(Gyarados,Gyrados)', 'Pikachu':'(Pikachu,Pickachu)'}
-            for query in [low, low.replace(p.card,typos.get(p.card,p.card))]:
+            alias = CARD_NAME_TYPOS.get(p.card)
+            typo_query = low.replace(p.card, f'({p.card},{alias})', 1) if alias else low
+            for query in dict.fromkeys((low, typo_query)):
                 if len(query) <= 100:
                     output.append(dict(common, lane='poor_title', ebay_query=query,
                         sort='newlyListed', buying_option='FIXED_PRICE', identity_requires_review=True))
@@ -248,4 +257,17 @@ def four_lane_plan(identities=None, comp_index=None, *, limit=100,
         first=next((q for q in pending if q['lane']==lane),None)
         if first:
             selected.append(first);pending.remove(first)
+    if exploration_offset is not None and pending:
+        if exploration_offset < 0:
+            raise ValueError('Exploration offset must be nonnegative')
+        remaining = max(0, limit - len(selected))
+        exploration = min(len(pending), remaining // 3)
+        core = pending[:remaining - exploration]
+        tail = pending[len(core):]
+        if tail and exploration:
+            start = exploration_offset % len(tail)
+            selected.extend(core + (tail[start:] + tail[:start])[:exploration])
+        else:
+            selected.extend(core)
+        return selected[:limit]
     return (selected+pending)[:limit]

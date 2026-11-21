@@ -132,16 +132,58 @@ class CompSummary:
         }
 
 
+def _ebay_sale_id(url: str) -> str | None:
+    from urllib.parse import urlsplit
+
+    try:
+        parsed = urlsplit(url)
+    except ValueError:
+        return None
+    if parsed.scheme not in ('http', 'https') or parsed.hostname not in (
+        'ebay.com', 'www.ebay.com', 'ebay.co.uk', 'www.ebay.co.uk',
+        'ebay.ca', 'www.ebay.ca', 'ebay.com.au', 'www.ebay.com.au',
+        'ebay.de', 'www.ebay.de', 'ebay.fr', 'www.ebay.fr',
+    ):
+        return None
+    match = re.fullmatch(r'/itm/(?:[^/]+/)?(\d{9,15})/?', parsed.path)
+    return match[1] if match else None
+
+
+def _sale_facts(record: CompRecord) -> tuple:
+    return (
+        _norm_set(record.set_name), _norm_text(record.card), _norm_number(record.number),
+        _norm_edition(record.edition), record.grader, record.grade_bucket, record.sale_date,
+        record.price_usd, _norm_text(record.finish), record.language.casefold(),
+    )
+
+
 class CompIndex:
     """In-memory index of dated reported sales keyed by normalized card identity."""
 
     def __init__(self, records: Iterable[CompRecord]) -> None:
-        self.records = list(dict.fromkeys(records))
+        self.reported_records = tuple(dict.fromkeys(records))
+        transactions: dict[str, CompRecord] = {}
+        conflicts: set[str] = set()
+        undeduplicated: list[CompRecord] = []
+        for record in self.reported_records:
+            item_id = _ebay_sale_id(record.source_url)
+            if item_id is None:
+                undeduplicated.append(record)
+                continue
+            prior = transactions.setdefault(item_id, record)
+            if _sale_facts(prior) != _sale_facts(record):
+                conflicts.add(item_id)
+        self.conflicting_ebay_item_ids = frozenset(conflicts)
+        self.records = undeduplicated + [
+            record for item_id, record in transactions.items() if item_id not in conflicts
+        ]
+        self._by_number: dict[str, list[CompRecord]] = defaultdict(list)
         self._by_exact: dict[tuple[str, str, str, str], list[CompRecord]] = defaultdict(list)
         self._by_card_num: dict[tuple[str, str], list[CompRecord]] = defaultdict(list)
         for rec in self.records:
             ek = (_norm_set(rec.set_name), _norm_text(rec.card), _norm_number(rec.number), _norm_edition(rec.edition))
             self._by_exact[ek].append(rec)
+            self._by_number[ek[2]].append(rec)
             self._by_card_num[(_norm_text(rec.card), _norm_number(rec.number))].append(rec)
 
     @classmethod
@@ -160,6 +202,17 @@ class CompIndex:
 
     @staticmethod
     def _parse_row(row: dict[str, Any], *, default_set: str = "") -> CompRecord | None:
+        # Normalized provider imports must identify resolved completed sales.
+        # Historical committed reports do not have these optional columns.
+        status = str(row.get('sale_status') or '').strip().casefold()
+        if status and status not in ('sold', 'completed', 'settled'):
+            return None
+        currency = str(row.get('currency') or 'USD').strip().upper()
+        if currency != 'USD':
+            return None
+        offer = str(row.get('best_offer_status') or '').strip().casefold()
+        if offer and offer not in ('not_applicable', 'resolved', 'found'):
+            return None
         card = str(row.get("card") or "").strip()
         number = str(row.get("card_number") or row.get("number") or "").strip()
         set_name = str(row.get("set") or default_set).strip()
@@ -167,7 +220,7 @@ class CompIndex:
         grader = str(row.get("grading_company") or row.get("grade_company") or row.get("grader") or "").strip()
         grade_raw = str(row.get("grade_class") or row.get("grade") or "").strip()
         bucket = _norm_grade_bucket(grader, grade_raw)
-        price = _money(row.get("reported_price_usd") or row.get("reported_usd"))
+        price = _money(row.get("reported_price_usd") or row.get("reported_usd") or row.get("transaction_price_usd"))
         sale_date = str(row.get("reported_date") or row.get("reported_sale_date") or row.get("sale_date") or "").strip()
         url = str(row.get("source_url") or row.get("sale_or_report_source_url") or "").strip()
         title = str(row.get("reported_title_context") or row.get("reported_listing_title_or_context") or row.get("reported_sale_title") or "").strip()
@@ -206,7 +259,7 @@ class CompIndex:
             return None
         text = ' '+_norm_text(title)+' '
         choices = {}
-        for r in self.records:
+        for r in self._by_number.get(parsed.card_number, []):
             if (' '+_norm_text(r.card)+' ') not in text or parsed.card_number != _norm_number(r.number):
                 continue
             if (parsed.language != r.language or parsed.finish != r.finish or
@@ -224,7 +277,7 @@ class CompIndex:
             return None
         text = ' ' + _norm_text(title) + ' '
         proposals = {}
-        for r in self.records:
+        for r in self._by_number.get(parsed.card_number, []):
             if (' '+_norm_text(r.card)+' ') not in text or (' '+_norm_set(r.set_name)+' ') not in text:
                 continue
             if parsed.card_number != _norm_number(r.number):

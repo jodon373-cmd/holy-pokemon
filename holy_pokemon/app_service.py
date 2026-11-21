@@ -192,7 +192,10 @@ def command(store, action, b):
         import os
         from .scan_pipeline import load_saved_listings,scan_listings
         source=os.getenv('HOLY_SOURCE_DATABASE',str(ROOT/'outputs/holy.sqlite3'))
-        return scan_listings(load_saved_listings(source,limit=int(b.get('limit',100))))
+        limit = int(b.get('limit', 100))
+        if not 1 <= limit <= 500:
+            raise ValueError('Dashboard saved-lead limit must be 1..500')
+        return scan_listings(load_saved_listings(source, limit=limit))
     if action == 'upgrade-scan':
         from .scan_pipeline import scan_listings
         listings=b.get('listings',[])

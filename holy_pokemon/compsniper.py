@@ -278,8 +278,10 @@ def enrich_comp_index(client, index, listing, *, target_grader='CGC', target_gra
         added.append(CompRecord(set_name, card, number, listing['edition'], target_grader,
             target_grade,row['ended_at_utc'][:10],money(row['transaction_price_usd_reported']),
             row['source_url'],row['title'],listing['finish'],p.language))
-    return CompIndex([*index.records,*added]), dict(status='THIRD_PARTY_REPORTED_ONLY',
-        added=len(added), pending_variant_review=pending, trade_approved=False)
+    updated = CompIndex([*index.reported_records, *added])
+    newly_usable = set(updated.records) - set(index.records)
+    return updated, dict(status='THIRD_PARTY_REPORTED_ONLY',
+        added=len(newly_usable), pending_variant_review=pending, trade_approved=False)
 
 
 class CompSniperClient:

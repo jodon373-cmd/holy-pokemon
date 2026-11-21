@@ -1,21 +1,21 @@
-"""Restricted TLS context and sanitized network error helpers for eBay Browse."""
-from __future__ import annotations
+"""TLS and redacted errors for the reviewed Browse adapter."""
 
 import ssl
 
 
 class NetworkProblem(RuntimeError):
-    """Sanitized network failure that never exposes credentials or raw headers."""
+    def __init__(self, code):
+        super().__init__("eBay network failure: " + code)
 
 
-def context() -> ssl.SSLContext:
-    """Return a strict TLS 1.2+ SSL context using system trust roots."""
-    ctx = ssl.create_default_context()
-    ctx.minimum_version = ssl.TLSVersion.TLSv1_2
-    return ctx
+def context():
+    try:
+        import certifi
+
+        return ssl.create_default_context(cafile=certifi.where())
+    except ImportError:
+        return ssl.create_default_context()
 
 
-def failure(exc: BaseException) -> NetworkProblem:
-    """Map low-level socket/URL errors to a safe, non-leaky NetworkProblem."""
-    name = type(exc).__name__
-    return NetworkProblem(f"NETWORK_ERROR:{name}")
+def failure(exc):
+    return NetworkProblem("CONNECTION")

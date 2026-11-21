@@ -14,9 +14,8 @@ from decimal import Decimal, InvalidOperation
 from pathlib import Path
 import re
 from statistics import median
-from typing import Any, Iterable
-
 from .title_parser import parse_title
+from typing import Any, Iterable
 
 ROOT = Path(__file__).resolve().parents[1] / "research"
 DEFAULT_SOURCES = (
@@ -54,7 +53,7 @@ def _norm_edition(value: str | None) -> str:
         return "shadowless"
     if "promo" in s or "black star" in s:
         return "promo"
-    return "unlimited"
+    return "unlimited" if "unlimited" in s else "unspecified"
 
 
 def _norm_grade_bucket(grader: str | None, grade_raw: str | None) -> tuple[str, str] | None:
@@ -62,15 +61,21 @@ def _norm_grade_bucket(grader: str | None, grade_raw: str | None) -> tuple[str, 
     val = str(grade_raw or "").upper().strip()
     if not g or not val:
         return None
-    val = val.removeprefix(g + "_")
-    val = {"MINT_9": "9", "MINT_8": "8"}.get(val, val)
+    if g == 'PSA' and val in {'PSA_9', 'MINT_9'}:
+        return g, '9'
     if g == "CGC":
-        aliases = {"10": "GEM_MINT_10", "PRISTINE 10": "PRISTINE_10"}
-        val = aliases.get(val, val)
-    # Never coerce decimal grades, guides or mixed grade classes to a whole grade.
-    if val not in {"1", "2", "3", "4", "5", "6", "7", "8", "8.5", "9", "9.5", "10", "GEM_MINT_10", "PRISTINE_10"}:
-        return None
-    return g, val
+        if val in {"PRISTINE_10", "CGC_PRISTINE_10", "PRISTINE 10"}:
+            return g, "PRISTINE_10"
+        if val in {"GEM_MINT_10", "CGC_GEM_MINT_10", "GEM MINT 10"}:
+            return g, "GEM_MINT_10"
+        if val in {"LEGACY_BLUE_9_5", "MINT_PLUS_9_5", "UNKNOWN_9_5"}:
+            return g, val
+        if val == "10":
+            return g, "UNKNOWN_10"
+        if val == "9.5":
+            return g, "UNKNOWN_9_5"
+    number = re.fullmatch(r"(?:PSA|BGS|CGC|SGC)?\s*(10|[1-9](?:\.5)?)", val)
+    return (g, number.group(1)) if g in {"PSA", "BGS", "CGC", "SGC"} and number else None
 
 
 def _money(value: Any) -> Decimal | None:
@@ -97,7 +102,6 @@ class CompRecord:
     title_context: str
     finish: str = "Unspecified"
     language: str = "English"
-    source_status: str = "SOURCE_REPORTED_NOT_INDEPENDENTLY_CONFIRMED"
 
 
 @dataclass(frozen=True)
@@ -115,7 +119,6 @@ class CompSummary:
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            "evidence_status": "SOURCE_REPORTED_NOT_INDEPENDENTLY_CONFIRMED",
             "grader": self.grader,
             "grade_bucket": self.grade_bucket,
             "count": self.count,
@@ -133,7 +136,7 @@ class CompIndex:
     """In-memory index of dated reported sales keyed by normalized card identity."""
 
     def __init__(self, records: Iterable[CompRecord]) -> None:
-        self.records = list(records)
+        self.records = list(dict.fromkeys(records))
         self._by_exact: dict[tuple[str, str, str, str], list[CompRecord]] = defaultdict(list)
         self._by_card_num: dict[tuple[str, str], list[CompRecord]] = defaultdict(list)
         for rec in self.records:
@@ -160,7 +163,7 @@ class CompIndex:
         card = str(row.get("card") or "").strip()
         number = str(row.get("card_number") or row.get("number") or "").strip()
         set_name = str(row.get("set") or default_set).strip()
-        edition = str(row.get("edition") or row.get("variant") or "unlimited").strip()
+        edition = str(row.get("edition") or row.get("variant") or "Unspecified").strip()
         grader = str(row.get("grading_company") or row.get("grade_company") or row.get("grader") or "").strip()
         grade_raw = str(row.get("grade_class") or row.get("grade") or "").strip()
         bucket = _norm_grade_bucket(grader, grade_raw)
@@ -168,13 +171,13 @@ class CompIndex:
         sale_date = str(row.get("reported_date") or row.get("reported_sale_date") or row.get("sale_date") or "").strip()
         url = str(row.get("source_url") or row.get("sale_or_report_source_url") or "").strip()
         title = str(row.get("reported_title_context") or row.get("reported_listing_title_or_context") or row.get("reported_sale_title") or "").strip()
-        if not (card and number and bucket and price and re.fullmatch(r"\d{4}-\d{2}-\d{2}", sale_date)):
+        if not (card and number and bucket and price and url and re.fullmatch(r"\d{4}-\d{2}-\d{2}", sale_date)):
             return None
         try:
             date.fromisoformat(sale_date)
         except ValueError:
             return None
-        parsed = parse_title(title + " " + edition, expected_language="")
+        parsed = parse_title(title)
         return CompRecord(
             set_name=set_name,
             card=card,
@@ -188,11 +191,52 @@ class CompIndex:
             title_context=title,
             finish=str(row.get("finish") or parsed.finish),
             language=str(row.get("language") or parsed.language),
-            source_status=str(row.get("source_status") or row.get("verification") or row.get("verification_status") or "SOURCE_REPORTED_NOT_INDEPENDENTLY_CONFIRMED"),
         )
 
     def card_keys(self) -> list[tuple[str, str]]:
         return sorted(self._by_card_num.keys())
+
+    def match_title(self, title: str, *, allow_missing_set=False):
+        """Catalog proposal only; relaxed queries still require an unambiguous exact variant."""
+        exact = self.propose_identity(title)
+        if exact or not allow_missing_set:
+            return exact
+        parsed = parse_title(title)
+        if parsed.disqualified or parsed.edition == 'Unspecified':
+            return None
+        text = ' '+_norm_text(title)+' '
+        choices = {}
+        for r in self.records:
+            if (' '+_norm_text(r.card)+' ') not in text or parsed.card_number != _norm_number(r.number):
+                continue
+            if (parsed.language != r.language or parsed.finish != r.finish or
+                _norm_edition(parsed.edition) != _norm_edition(r.edition)):
+                continue
+            key = (r.set_name,r.card,r.number,r.edition,r.finish,r.language)
+            choices[key] = dict(set_name=r.set_name,card=r.card,number=r.number,
+                                edition=r.edition,finish=r.finish,language=r.language)
+        return next(iter(choices.values())) if len(choices)==1 else None
+
+    def propose_identity(self, title: str) -> dict[str, str] | None:
+        """Unique title/catalog association only; never physical-copy verification."""
+        parsed = parse_title(title)
+        if parsed.edition == 'Unspecified':
+            return None
+        text = ' ' + _norm_text(title) + ' '
+        proposals = {}
+        for r in self.records:
+            if (' '+_norm_text(r.card)+' ') not in text or (' '+_norm_set(r.set_name)+' ') not in text:
+                continue
+            if parsed.card_number != _norm_number(r.number):
+                continue
+            if parsed.edition != 'Unspecified' and _norm_edition(parsed.edition) != _norm_edition(r.edition):
+                continue
+            if parsed.finish != r.finish or parsed.language != r.language:
+                continue
+            key = (_norm_set(r.set_name),r.card,r.number,_norm_edition(r.edition),r.finish,r.language)
+            proposals[key] = dict(card=r.card,number=r.number,set_name=r.set_name,edition=r.edition,
+                                  finish=r.finish,language=r.language)
+        return next(iter(proposals.values())) if len(proposals) == 1 else None
 
     def summarize(
         self,
@@ -206,26 +250,28 @@ class CompIndex:
         as_of: str | None = None,
         finish: str | None = None,
         language: str | None = None,
+        max_age_days: int = 90,
     ) -> CompSummary | None:
         as_of = as_of or date.today().isoformat()
-        date.fromisoformat(as_of)
+        as_of_d = date.fromisoformat(as_of)
         pool = self._by_card_num.get((_norm_text(card), _norm_number(number)), [])
         if set_name:
             pool = [r for r in pool if _norm_set(r.set_name) == _norm_set(set_name)]
         if edition:
             pool = [r for r in pool if _norm_edition(r.edition) == _norm_edition(edition)]
         if finish and finish != "Unspecified":
-            pool = [r for r in pool if r.finish.casefold() == finish.casefold()]
+            pool = [r for r in pool if _norm_text(r.finish) == _norm_text(finish)]
         if language:
             pool = [r for r in pool if r.language.casefold() == language.casefold()]
-        pool = [r for r in pool if r.grader == grader.upper() and r.grade_bucket == grade_bucket]
-        # An underspecified identity may not silently pool distinct variants.
-        if len({(_norm_set(r.set_name), _norm_edition(r.edition), r.finish, r.language) for r in pool}) > 1:
+
+        # An underspecified request must not pool different printings, languages or editions.
+        if len({(_norm_set(r.set_name),_norm_edition(r.edition),r.finish,r.language) for r in pool})>1:
             return None
 
         matched = [
             r for r in pool
-            if r.grader == grader.upper() and r.grade_bucket == grade_bucket and r.sale_date <= as_of
+            if r.grader == grader.upper() and r.grade_bucket == grade_bucket
+            and 0 <= (as_of_d - date.fromisoformat(r.sale_date)).days <= max_age_days
         ]
         if not matched:
             return None

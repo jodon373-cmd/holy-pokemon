@@ -18,7 +18,6 @@ import csv as _csv
 import csv
 import hashlib
 import json
-import re
 from pathlib import Path
 
 ALLOWED_RIGHTS = {"self_photographed", "explicit_permission", "verified_permissive_license"}

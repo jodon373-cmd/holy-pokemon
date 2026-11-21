@@ -6,8 +6,6 @@ identifies a card. Unsupported/occluded layouts abstain. No trained model or
 validated accuracy is claimed. All coordinates refer to unchanged originals.
 """
 from __future__ import annotations
-import hashlib
-from pathlib import Path
 import cv2
 import numpy as np
 from .centering_v2 import _order_quad

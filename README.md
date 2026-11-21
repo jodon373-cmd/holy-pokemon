@@ -4,6 +4,10 @@
 
 **START CODEX LOCALLY:** **[ONE-SHOT ALL-IN-ONE EXECUTION](docs/CODEX_ONE_SHOT_EXECUTION.md)** is now the single most recent and authoritative build order. It covers full Fredy images + held-out training, all sourced arbitrage rules, eBay/PSA Vault/other venue adapters, portfolio cash cycle, backtesting, and premium blue/red Pokémon-inspired dashboard. Older [master build](docs/CODEX_MASTER_BUILD.md) and [grader-first](docs/CODEX_GRADER_FIRST_LAUNCH.md) documents are supporting technical references, not competing prompts. **The code is a starting foundation, not a trained grader or completed live scanner.**
 
+## Four-lane arbitrage engine — 2026-11-21
+
+The integrated search engine now provides separate BIN/auction discovery, persistent deduplication, exact-grade comp matching, Fredy route economics and a read-only `/search-engine` dashboard. See [run instructions](docs/RUN_IMPLEMENTED_CODE.md#four-lane-arbitrage-engine-2026-11-21) and [verified scope](docs/IMPLEMENTATION_STATUS.md#arbitrage-engine-integration-2026-11-21). It is research software; image geometry remains unvalidated and live provider integration was not exercised in this update.
+
 ## Open-ended arbitrage strategy research — 2026-10-29
 
 **[READ THE COMPLETE NEW STRATEGY PLAYBOOK](docs/OPEN_ENDED_ARBITRAGE_DISCOVERY.md)** · **[ALL SOURCE/UNCERTAINTY RECORDS](research/strategy_discovery/evidence_manifest.json)** · **[13 EXTENSIBLE ROUTES](research/strategy_discovery/routes.json)**.

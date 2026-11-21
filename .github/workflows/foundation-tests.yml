@@ -1,8 +1,9 @@
-name: Holy Pokémon foundation tests
+name: Holy Pokemon offline regression tests
 on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
@@ -13,11 +14,27 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Install image audit dependency
-        run: python -m pip install 'Pillow>=10,<13' 'numpy>=1.26,<3' 'opencv-python-headless>=4.8,<5'
-      - name: Read-only unit tests
+      - name: Install local application and checks
+        run: python -m pip install -e '.[dev]' 'numpy>=1.26,<3' 'opencv-python-headless>=4.8,<5'
+      - name: Offline unit and workflow tests
         run: python -m unittest discover -s tests -p 'test_*.py' -v
+      - name: Static checks
+        run: python -m ruff check holy_pokemon tests tools
       - name: Reconstruct source-reported totals
         run: python -m holy_pokemon monthly > /tmp/fredy_monthly_report.json
       - name: Export evidenced operating rules
         run: python -m holy_pokemon rules > /tmp/fredy_rules.json
+  synthetic-training-pipeline:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install CPU-only vision runtime
+        run: |
+          python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install -e .
+      - name: Fit save reload and evaluate explicitly synthetic checkpoint
+        run: PYTHONPATH=. python tools/synthetic_training_smoke.py

@@ -11,9 +11,9 @@ import re
 from typing import Any
 
 # Ordered most-specific first
-_CGC_PRISTINE_RE = re.compile(r"\bCGC\b.{0,24}\bPRISTINE\b.{0,10}\b10\b|\bPRISTINE\s*10\b", re.IGNORECASE)
-_CGC_GEM_RE = re.compile(r"\bCGC\b.{0,24}\bGEM\s*MINT\b.{0,10}\b10\b|\bCGC\s*10\b", re.IGNORECASE)
-_CGC_BLUE_RE = re.compile(r"\b(?:OLD\s*)?BLUE\s*LABEL\b|\bCGC\s*9\.5\b", re.IGNORECASE)
+_CGC_PRISTINE_RE = re.compile(r"\bPRISTINE\s*10\b|\bCGC\s*10\s+PRISTINE\b", re.IGNORECASE)
+_CGC_GEM_RE = re.compile(r"\bGEM\s*MINT\s*10\b|\bCGC\s*10\s+GEM\s*MINT\b", re.IGNORECASE)
+_CGC_BLUE_RE = re.compile(r"\b(?:OLD\s*)?BLUE\s*LABEL\b", re.IGNORECASE)
 _GRADER_GRADE_RE = re.compile(
     r"\b(PSA|CGC|BGS|BECKETT|SGC)\s*[-#:]?\s*(10|9\.5|9|8\.5|8|7\.5|7|6|5|4|3|2|1)\b",
     re.IGNORECASE,
@@ -64,7 +64,7 @@ class ParsedListing:
         return asdict(self)
 
 
-def parse_title(title: str, *, expected_language: str = "English") -> ParsedListing:
+def parse_title(title: str, *, expected_language: str | None = None) -> ParsedListing:
     """Parse an eBay / marketplace Pokémon card title into structured attributes."""
     raw = " ".join(str(title or "").split())
     lower = raw.lower()
@@ -88,10 +88,14 @@ def parse_title(title: str, *, expected_language: str = "English") -> ParsedList
             grader = "CGC"
             grade = "10"
             cgc_sub_tier = "GEM_MINT_10"
-        elif _CGC_BLUE_RE.search(raw) and grade == "9.5":
+        elif _CGC_BLUE_RE.search(raw) and grade == "9.5" and re.search(r"gem\s*mint", lower):
             grader = "CGC"
             grade = grade or "9.5"
             cgc_sub_tier = "LEGACY_BLUE_9_5"
+        elif grade == "10":
+            cgc_sub_tier = "UNKNOWN_10"
+        elif grade == "9.5":
+            cgc_sub_tier = "MINT_PLUS_9_5" if re.search(r"mint\s*\+", lower) else "UNKNOWN_9_5"
     elif grader is None and re.search(r"\b(raw|ungraded|nm|near\s*mint)\b", lower):
         grader = "RAW"
 
@@ -114,11 +118,11 @@ def parse_title(title: str, *, expected_language: str = "English") -> ParsedList
     elif "promo" in lower or "black star" in lower:
         edition = "Promo"
     else:
-        edition = "Unlimited"
+        edition = "Unlimited" if "unlimited" in lower else "Unspecified"
 
     if re.search(r"\bnon[-\s]?holo\b", lower):
         finish = "Non-Holo"
-    elif re.search(r"\breverse\s*holo\b", lower):
+    elif re.search(r"\b(?:reverse\s*(?:holo|foil)|rev[.\s-]*foil)\b", lower):
         finish = "Reverse Holo"
     elif re.search(r"\balt(?:ernate)?\s*art\b|\bfull\s*art\b|\bsir\b", lower):
         finish = "Full/Alt Art"
@@ -156,8 +160,8 @@ def parse_title(title: str, *, expected_language: str = "English") -> ParsedList
     conf = round(min(1.0, conf), 2)
 
     tokens = tuple(re.findall(r"[a-z0-9]+", lower))
-    disqualified = bool(qualifiers) or any(
-        f in flags for f in ("lot_or_bundle", "proxy_or_fake", "empty_or_case", "damaged")
+    disqualified = any(
+        f in flags for f in ("lot_or_bundle", "proxy_or_fake", "empty_or_case", "damaged", "graded_qualifier")
     ) or any(f.startswith("language_mismatch:") for f in flags)
 
     return ParsedListing(

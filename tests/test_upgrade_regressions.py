@@ -42,7 +42,9 @@ class UpgradeRegressionTests(unittest.TestCase):
         self.assertIsNone(_norm_grade_bucket('PSA', 'Grade 9 guide'))
 
     def test_trimmed_outlier_does_not_affect_weighted_price(self):
-        summary = self.summary([self.record(price=p) for p in ['100', '100', '100', '100', '10000']])
+        from dataclasses import replace
+        summary = self.summary([replace(self.record(price=p),source_url=f'https://example.com/sale/{i}')
+                                for i,p in enumerate(['100', '100', '100', '100', '10000'])])
         self.assertEqual(summary.count, 4)
         self.assertEqual(summary.recency_weighted_usd, D('100'))
 

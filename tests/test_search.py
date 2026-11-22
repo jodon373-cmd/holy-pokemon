@@ -43,8 +43,7 @@ class TitleParserTests(unittest.TestCase):
     def test_disqualifies_lots_proxies_and_wrong_language(self):
         self.assertTrue(parse_title("Pokemon Lot of 5 PSA 9 Jungle Holos").disqualified)
         self.assertTrue(parse_title("Custom Proxy Orica Charizard PSA 10").disqualified)
-        self.assertTrue(parse_title("Japanese Pokemon Jungle Vaporeon 12/64 PSA 9", expected_language='English').disqualified)
-        self.assertFalse(parse_title("Japanese Pokemon Jungle Vaporeon 12/64 PSA 9").disqualified)
+        self.assertTrue(parse_title("Japanese Pokemon Jungle Vaporeon 12/64 PSA 9").disqualified)
         q = parse_title("Pokemon Vaporeon 12/64 PSA 9 OC")
         self.assertIn("OC", q.qualifiers)
         self.assertIn("graded_qualifier", q.red_flags)

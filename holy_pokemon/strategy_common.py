@@ -33,11 +33,8 @@ def export_csv(path: str | Path, rows: Iterable[Mapping[str, Any]], fields: Iter
         writer = csv.DictWriter(handle, fieldnames=columns, lineterminator="\n")
         writer.writeheader()
         for row in row_list:
-            safe = {}
-            for k,v in row.items():
-                value=json.dumps(v, sort_keys=True) if isinstance(v,(list,dict,tuple)) else v
-                if isinstance(value,str) and value.lstrip().startswith(('=','+','-','@','\t','\r')):
-                    value="'"+value
-                safe[k]=value
-            writer.writerow(safe)
+            writer.writerow({
+                k: json.dumps(v, sort_keys=True) if isinstance(v, (list, dict, tuple)) else ("'" + v if isinstance(v, str) and v.lstrip().startswith(("=", "+", "-", "@")) else v)
+                for k, v in row.items()
+            })
     return out

@@ -9,9 +9,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import Any, Iterable
-from datetime import datetime, timedelta, timezone
-import json
-from pathlib import Path
 
 from .comp_index import CompIndex
 from .open_strategy_discovery import DEFAULT_CROSS_SET, DEFAULT_JUNGLE, Identity, load_universe
@@ -66,7 +63,6 @@ def build_ebay_query(
     """Build a compact, high-precision eBay Browse query (<=100 chars)."""
     parts = [
         "Pokemon",
-        identity.language if identity.language and identity.language != 'English' else '',
         identity.set,
         identity.card,
         identity.number,
@@ -83,19 +79,13 @@ def build_ebay_query(
     if origin_grader and origin_grade:
         parts.append(f"{origin_grader} {origin_grade}")
 
-    # Never truncate the grader/grade off a long query.
     base = " ".join(p for p in parts if p)
-    if len(base) > max_length:
-        raise ValueError('Identity cannot fit within eBay query limit without dropping set/variant')
+    if max_length < 1 or len(base) > max_length:
+        raise ValueError("Exact identity exceeds query length; shorten identity explicitly")
     if not include_negatives:
         return base
 
-    protective = []
-    if 'unlimited' in ed_lower:
-        protective += ['-"1st edition"', '-shadowless']
-    if 'holo' in ed_lower and 'non' not in ed_lower:
-        protective += ['-non-holo']
-    for neg in (*protective, *NEGATIVE_EXCLUSIONS):
+    for neg in NEGATIVE_EXCLUSIONS:
         candidate = f"{base} {neg}"
         if len(candidate) <= max_length:
             base = candidate
@@ -117,9 +107,6 @@ def plan_queries(
     """Rank search queries by historical comp spread and comp depth."""
     planned: list[PlannedQuery] = []
     for ident in identities:
-        from .title_parser import parse_title
-
-        finish = parse_title(ident.edition).finish
         target_comp = comp_index.summarize(
             card=ident.card,
             number=ident.number,
@@ -127,7 +114,6 @@ def plan_queries(
             grade_bucket=target_grade_bucket,
             set_name=ident.set,
             edition=ident.edition,
-            language=ident.language, finish=finish,
         )
         origin_comp = comp_index.summarize(
             card=ident.card,
@@ -136,7 +122,6 @@ def plan_queries(
             grade_bucket=origin_grade,
             set_name=ident.set,
             edition=ident.edition,
-            language=ident.language, finish=finish,
         )
 
         prio = 10.0
@@ -149,11 +134,7 @@ def plan_queries(
             else:
                 prio += min(30.0, float(target_comp.p25_usd / Decimal("25")))
 
-        try:
-            ebay_q = build_ebay_query(ident, origin_grader=origin_grader, origin_grade=origin_grade)
-        except ValueError:
-            # One long external catalog identity must not abort discovery for the rest.
-            continue
+        ebay_q = build_ebay_query(ident, origin_grader=origin_grader, origin_grade=origin_grade)
         cs_kw = " ".join(p for p in ("Pokemon", ident.set, ident.card, ident.number) if p)
 
         planned.append(
@@ -180,94 +161,7 @@ def plan_queries(
     return planned[:limit] if limit is not None else planned
 
 
-def plan_default_universe(*, limit: int | None = 25, **route) -> list[dict[str, Any]]:
+def plan_default_universe(*, limit: int | None = 25) -> list[dict[str, Any]]:
     identities, _ = load_universe([DEFAULT_JUNGLE, DEFAULT_CROSS_SET])
     idx = CompIndex.from_csvs()
-    return [q.to_dict() for q in plan_queries(identities, idx, limit=limit, **route)]
-
-
-def four_lane_plan(identities=None, comp_index=None, *, limit=100,
-                   auction_window_hours=6, now=None, max_price=500, exploration_offset=None):
-    """Quota-bounded research requests, with route seeds rather than a card whitelist."""
-    from .title_parser import CARD_NAME_TYPOS, parse_title
-    from .promo_priority import queries as promo_queries
-    if auction_window_hours <= 0 or limit < 1:
-        raise ValueError('Positive auction window and query limit required')
-    idx = comp_index or CompIndex.from_csvs()
-    if identities is None:
-        identities, _ = load_universe([DEFAULT_JUNGLE, DEFAULT_CROSS_SET])
-    identities = list(identities)
-    clock = now or datetime.now(timezone.utc)
-    registry = Path(__file__).resolve().parents[1]/'research/strategy_discovery/routes.json'
-    documented = json.loads(registry.read_text()).get('routes', [])
-    routes = [('PSA','8','CGC','GEM_MINT_10'), ('PSA','9','CGC','GEM_MINT_10'),
-              ('PSA','9','PSA','10'), ('CGC','9','CGC','GEM_MINT_10'), ('BGS','9.5','PSA','10')]
-    from .comp_index import _norm_grade_bucket
-    from .fredy_business import operating_rules
-    for route in documented:
-        origin=route.get('origin',{});destination=route.get('destination',{})
-        bucket=_norm_grade_bucket(destination.get('grader'),destination.get('grade'))
-        if origin.get('grader') not in {'PSA','CGC','BGS'} or not bucket:
-            continue
-        if str(origin.get('grade')) not in {'7','8','9','9.5','10'} or bucket[1] in {'PRISTINE_10','UNKNOWN_10'}:
-            continue
-        routes.append((origin['grader'],str(origin['grade']),*bucket))
-    routes=list(dict.fromkeys(routes))
-    output = []
-    for grader, grade, dest, bucket in routes:
-        for p in plan_queries(identities, idx, origin_grader=grader, origin_grade=grade,
-                              target_grader=dest, target_grade_bucket=bucket):
-            common = dict(p.to_dict(), expected_grader=grader, expected_grade=grade,
-                          target_grader=dest, target_grade_bucket=bucket,
-                          max_price=max_price, condition_ids=[2750],
-                          condition_descriptors={'27501': grader, '27502': grade},
-                          fieldgroups='EXTENDED', route_registry_size=len(documented),
-                          fredy_rule_ids=[r['id'] for r in operating_rules()])
-            output.append(dict(common, lane='high_spread', sort='newlyListed',
-                               buying_option='FIXED_PRICE'))
-            if p.target_comp_count >= 3:
-                end = (clock+timedelta(hours=auction_window_hours)).isoformat().replace('+00:00','Z')
-                output.append(dict(common, lane='auction_sniper', sort='endingSoonest',
-                                   buying_option='AUCTION', item_end_date='[..'+end+']'))
-            # Low-competition omissions remain proposals, never exact identity approval.
-            low = ' '.join([p.card, '#'+p.number, grader, grade, '-lot', '-proxy'])
-            alias = CARD_NAME_TYPOS.get(p.card)
-            typo_query = low.replace(p.card, f'({p.card},{alias})', 1) if alias else low
-            for query in dict.fromkeys((low, typo_query)):
-                if len(query) <= 100:
-                    output.append(dict(common, lane='poor_title', ebay_query=query,
-                        sort='newlyListed', buying_option='FIXED_PRICE', identity_requires_review=True))
-    for q in promo_queries(limit=len(json.loads((registry.parents[1]/'pokemon_promo_priority.json').read_text())['queries'])):
-        parsed = parse_title(q['q'])
-        output.append(dict(lane='promo_priority', ebay_query=q['q'], sort='newlyListed',
-            buying_option='FIXED_PRICE', max_price=max_price, priority_score=100,
-            expected_grader=parsed.grader, expected_grade=parsed.grade,
-            target_grader='PSA' if 'PSA_10' in q['route'] else 'CGC',
-            target_grade_bucket='10' if 'PSA_10' in q['route'] else 'GEM_MINT_10',
-            target_comp_count=0, condition_ids=[2750], fieldgroups='EXTENDED',
-            promo_query_id=q['id']))
-    # Reserve coverage for all four lanes before spending the remaining quota on ranked requests.
-    unique = {}
-    for q in output:
-        key=(q['lane'],q['ebay_query'],q.get('target_grader'),q.get('target_grade_bucket'))
-        unique.setdefault(key,q)
-    pending=sorted(unique.values(),key=lambda r:r.get('priority_score',0),reverse=True)
-    selected=[]
-    for lane in ('high_spread','auction_sniper','poor_title','promo_priority'):
-        first=next((q for q in pending if q['lane']==lane),None)
-        if first:
-            selected.append(first);pending.remove(first)
-    if exploration_offset is not None and pending:
-        if exploration_offset < 0:
-            raise ValueError('Exploration offset must be nonnegative')
-        remaining = max(0, limit - len(selected))
-        exploration = min(len(pending), remaining // 3)
-        core = pending[:remaining - exploration]
-        tail = pending[len(core):]
-        if tail and exploration:
-            start = exploration_offset % len(tail)
-            selected.extend(core + (tail[start:] + tail[:start])[:exploration])
-        else:
-            selected.extend(core)
-        return selected[:limit]
-    return (selected+pending)[:limit]
+    return [q.to_dict() for q in plan_queries(identities, idx, limit=limit)]

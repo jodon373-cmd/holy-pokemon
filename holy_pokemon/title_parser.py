@@ -11,9 +11,9 @@ import re
 from typing import Any
 
 # Ordered most-specific first
-_CGC_PRISTINE_RE = re.compile(r"\bPRISTINE\s*10\b|\bCGC\s*10\s+PRISTINE\b", re.IGNORECASE)
-_CGC_GEM_RE = re.compile(r"\bGEM\s*MINT\s*10\b|\bCGC\s*10\s+GEM\s*MINT\b", re.IGNORECASE)
-_CGC_BLUE_RE = re.compile(r"\b(?:OLD\s*)?BLUE\s*LABEL\b", re.IGNORECASE)
+_CGC_PRISTINE_RE = re.compile(r"\bCGC\b.{0,24}\bPRISTINE\b.{0,10}\b10\b|\bPRISTINE\s*10\b", re.IGNORECASE)
+_CGC_GEM_RE = re.compile(r"\bCGC\b.{0,24}\bGEM\s*MINT\b.{0,10}\b10\b|\bCGC\s*10\b", re.IGNORECASE)
+_CGC_BLUE_RE = re.compile(r"\b(?:OLD\s*)?BLUE\s*LABEL\b|\bCGC\s*9\.5\b", re.IGNORECASE)
 _GRADER_GRADE_RE = re.compile(
     r"\b(PSA|CGC|BGS|BECKETT|SGC)\s*[-#:]?\s*(10|9\.5|9|8\.5|8|7\.5|7|6|5|4|3|2|1)\b",
     re.IGNORECASE,
@@ -39,26 +39,7 @@ _LANGUAGES = (
     ("French", re.compile(r"\b(french|francais|français)\b", re.IGNORECASE)),
     ("Spanish", re.compile(r"\b(spanish|espanol|español)\b", re.IGNORECASE)),
     ("Italian", re.compile(r"\b(italian|italiano)\b", re.IGNORECASE)),
-    ("Dutch", re.compile(r"\b(dutch|nederlands)\b", re.IGNORECASE)),
-    ("Portuguese", re.compile(r"\b(portuguese|portugu[eê]s)\b", re.IGNORECASE)),
-    ("Indonesian", re.compile(r"\b(indonesian|bahasa indonesia)\b", re.IGNORECASE)),
-    ("Thai", re.compile(r"\bthai\b", re.IGNORECASE)),
-    ("Russian", re.compile(r"\b(russian|русский)\b", re.IGNORECASE)),
 )
-
-
-CARD_NAME_TYPOS = {
-    'Charizard': 'Charzard',
-    'Blastoise': 'Blastiose',
-    'Gyarados': 'Gyrados',
-    'Pikachu': 'Pickachu',
-}
-
-
-def repair_known_card_typos(title: str) -> str:
-    for card, alias in CARD_NAME_TYPOS.items():
-        title = re.sub(r'\b' + re.escape(alias) + r'\b', card, title, flags=re.IGNORECASE)
-    return title
 
 
 @dataclass(frozen=True)
@@ -83,7 +64,7 @@ class ParsedListing:
         return asdict(self)
 
 
-def parse_title(title: str, *, expected_language: str | None = None) -> ParsedListing:
+def parse_title(title: str, *, expected_language: str = "English") -> ParsedListing:
     """Parse an eBay / marketplace Pokémon card title into structured attributes."""
     raw = " ".join(str(title or "").split())
     lower = raw.lower()
@@ -107,14 +88,10 @@ def parse_title(title: str, *, expected_language: str | None = None) -> ParsedLi
             grader = "CGC"
             grade = "10"
             cgc_sub_tier = "GEM_MINT_10"
-        elif _CGC_BLUE_RE.search(raw) and grade == "9.5" and re.search(r"gem\s*mint", lower):
+        elif _CGC_BLUE_RE.search(raw) and grade == "9.5":
             grader = "CGC"
             grade = grade or "9.5"
             cgc_sub_tier = "LEGACY_BLUE_9_5"
-        elif grade == "10":
-            cgc_sub_tier = "UNKNOWN_10"
-        elif grade == "9.5":
-            cgc_sub_tier = "MINT_PLUS_9_5" if re.search(r"mint\s*\+", lower) else "UNKNOWN_9_5"
     elif grader is None and re.search(r"\b(raw|ungraded|nm|near\s*mint)\b", lower):
         grader = "RAW"
 
@@ -137,11 +114,11 @@ def parse_title(title: str, *, expected_language: str | None = None) -> ParsedLi
     elif "promo" in lower or "black star" in lower:
         edition = "Promo"
     else:
-        edition = "Unlimited" if "unlimited" in lower else "Unspecified"
+        edition = "Unlimited"
 
     if re.search(r"\bnon[-\s]?holo\b", lower):
         finish = "Non-Holo"
-    elif re.search(r"\b(?:reverse\s*(?:holo|foil)|rev[.\s-]*foil)\b", lower):
+    elif re.search(r"\breverse\s*holo\b", lower):
         finish = "Reverse Holo"
     elif re.search(r"\balt(?:ernate)?\s*art\b|\bfull\s*art\b|\bsir\b", lower):
         finish = "Full/Alt Art"
@@ -179,8 +156,8 @@ def parse_title(title: str, *, expected_language: str | None = None) -> ParsedLi
     conf = round(min(1.0, conf), 2)
 
     tokens = tuple(re.findall(r"[a-z0-9]+", lower))
-    disqualified = any(
-        f in flags for f in ("lot_or_bundle", "proxy_or_fake", "empty_or_case", "damaged", "graded_qualifier")
+    disqualified = bool(qualifiers) or any(
+        f in flags for f in ("lot_or_bundle", "proxy_or_fake", "empty_or_case", "damaged")
     ) or any(f.startswith("language_mismatch:") for f in flags)
 
     return ParsedListing(

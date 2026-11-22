@@ -247,43 +247,6 @@ def normalize_recent_sold(payload):
             "rejection_counts": rejected, "trade_approved": False}
 
 
-def enrich_comp_index(client, index, listing, *, target_grader='CGC', target_grade='GEM_MINT_10'):
-    """Opt-in, exact-identity reports only. Unresolved offers never become price evidence."""
-    from .comp_index import CompIndex, CompRecord, _norm_edition, _norm_number, _norm_set
-    from .title_parser import parse_title
-    card = str(listing.get('card') or '')
-    number = str(listing.get('number') or '')
-    set_name = str(listing.get('set_name') or listing.get('set') or '')
-    if not all((card, number, set_name, listing.get('edition'), listing.get('finish'))):
-        return index, dict(status='MISSING_EXACT_IDENTITY', added=0)
-    keyword = ' '.join([card, number, set_name, target_grader,
-                        '10 Gem Mint' if target_grade=='GEM_MINT_10' else target_grade])[:200]
-    report = normalize_recent_sold(client.recent_sold(keyword))
-    added, pending = [], []
-    for row in report['records_needing_variant_validation']:
-        if not row['price_resolved']:
-            continue
-        p = parse_title(row['title'])
-        identity = index.match_title(row['title'])
-        bucket = p.cgc_sub_tier or p.grade
-        if not identity or p.grader != target_grader or bucket != target_grade:
-            pending.append(dict(source_url=row['source_url'], reason='IDENTITY_OR_GRADE_UNRESOLVED'))
-            continue
-        if (identity['card'].casefold()!=card.casefold() or
-            _norm_number(identity['number'])!=_norm_number(number) or
-            _norm_set(identity['set_name'])!=_norm_set(set_name) or
-            _norm_edition(identity['edition'])!=_norm_edition(listing['edition']) or
-            p.finish!=listing['finish'] or p.language!=listing.get('language','English')):
-            continue
-        added.append(CompRecord(set_name, card, number, listing['edition'], target_grader,
-            target_grade,row['ended_at_utc'][:10],money(row['transaction_price_usd_reported']),
-            row['source_url'],row['title'],listing['finish'],p.language))
-    updated = CompIndex([*index.reported_records, *added])
-    newly_usable = set(updated.records) - set(index.records)
-    return updated, dict(status='THIRD_PARTY_REPORTED_ONLY',
-        added=len(newly_usable), pending_variant_review=pending, trade_approved=False)
-
-
 class CompSniperClient:
     """Constrained, read-only provider calls with TTL cache and request budgeting."""
     def __init__(self, *, live=False, key=None, max_calls=3,
@@ -331,7 +294,7 @@ class CompSniperClient:
         except HTTPError as exc:
             raise RuntimeError("CompSniper HTTP " + str(exc.code) +
                                "; check permissions, quota and Retry-After (no automatic retry)") from None
-        except (URLError, TimeoutError):
+        except (URLError, TimeoutError) as exc:
             raise RuntimeError("CompSniper network error; no automatic retry") from None
         if not isinstance(data, dict):
             raise RuntimeError("Unexpected CompSniper response type")

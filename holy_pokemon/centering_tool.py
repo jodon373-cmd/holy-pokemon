@@ -25,7 +25,24 @@ def inspect(payload):
     side = payload.get('side', 'auto')
     if side == 'auto':
         from .centering_geometry import detect_outer
-        side = 'back' if detect_outer(image, 'back').get('outer_quad') else 'front'
+        front = measure_bgr(image, side='front')
+        back_quad = detect_outer(image, 'back').get('outer_quad')
+        front_quad = front.get('outer_quad')
+        # Blue front artwork can itself form a card-shaped rectangle. Choose
+        # the enclosing supported physical border, not that inner artwork.
+        if front_quad is not None and back_quad is not None:
+            front_contour = np.float32(front_quad)
+            back_contour = np.float32(back_quad)
+            back_inside_front = all(cv2.pointPolygonTest(front_contour, tuple(map(float, p)), False) >= 0 for p in back_quad)
+            front_inside_back = all(cv2.pointPolygonTest(back_contour, tuple(map(float, p)), False) >= 0 for p in front_quad)
+            if back_inside_front and not front_inside_back:
+                side = 'front'
+            elif front_inside_back and not back_inside_front:
+                side = 'back'
+            else:
+                raise ValueError('Photo side is ambiguous; use a photo of one complete card')
+        else:
+            side = 'back' if back_quad is not None else 'front'
 
     if payload.get('quad') is None:
         result = measure_bgr(image, side=side)

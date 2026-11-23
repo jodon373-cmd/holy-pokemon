@@ -91,6 +91,14 @@ Desktop source folders were preserved.
 
 ## Run automatic centering
 
+Select or drop front and back photos together. Each photo is processed in order;
+the tool detects its side and measures supported borders without corner placement.
+Automatic side detection compares enclosing physical borders so blue front artwork
+is not mistaken for a back. Yellow and silver front regressions include an
+off-center control. The local suite passes 113 tests without skips. A replay of
+the seven hash-pinned known-label photos correctly selected all seven sides;
+four photos measured and three abstained. This does not establish grade accuracy.
+
 Double-click `mac/Centering_Tool.command`, or run:
 
 ```sh
